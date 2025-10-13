@@ -1,7 +1,18 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlinx.serialization)
+}
+
+// Load properties from local.properties
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
 }
 
 android {
@@ -16,6 +27,19 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Expose keys to the app code
+        buildConfigField(
+            "String",
+            "IGDB_CLIENT_ID",
+            "\"${localProperties.getProperty("IGDB_CLIENT_ID")}\""
+        )
+        // Replaced the access token with the client secret for proper authentication
+        buildConfigField(
+            "String",
+            "IGDB_CLIENT_SECRET",
+            "\"${localProperties.getProperty("IGDB_CLIENT_SECRET")}\""
+        )
     }
 
     buildTypes {
@@ -36,11 +60,12 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true // Make sure this is enabled
     }
 }
 
 dependencies {
-
+    // ... your other dependencies
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -49,6 +74,11 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.coil.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
