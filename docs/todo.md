@@ -4,8 +4,6 @@
 
  - Game details screen implementation
     - User can click on a game card anywhere in the app to be taken to the relevant game screen
- - Discover screen implementation
- - Search screen implementation
  - Backlog implementation
     - Add/remove backlog items
     - Backlog list screen
@@ -26,5 +24,7 @@
  - ~~Repository set up~~
  - ~~IGDB API integration~~
  - ~~Game card implementation~~
+ - ~~Discover screen implementation~~
+ - ~~Search screen implementation~~
 
 #### Jacob:

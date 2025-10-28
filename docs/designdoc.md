@@ -5,7 +5,8 @@
 GameLogger is an Android game diary app. The goal is a tool for users to track, rate, and review games they've played.
 ### 1.2 The plan
 
-The core loop is: Find a game → Log/review it → See it in your diary. Without social features. We'll use the modern Android stack with Android Studio, Kotlin, Jetpack Compose, and a clean MVVM architecture.
+The core loop is: Find a game → Log/review it → See it in your diary. Using the modern Android stack with Android Studio, Kotlin, Jetpack Compose, and a clean MVVM architecture.
+
 ### 1.3 Similar existing apps
 
  - IGDB — a massive database, but clunky for just logging personal reviews.

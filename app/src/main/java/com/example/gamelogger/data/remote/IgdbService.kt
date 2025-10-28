@@ -42,6 +42,7 @@ class IgdbService {
 
         authToken = try {
             val response: HttpResponse = httpClient.post("https://id.twitch.tv/oauth2/token") {
+                // These references will now be resolved
                 parameter("client_id", BuildConfig.IGDB_CLIENT_ID)
                 parameter("client_secret", BuildConfig.IGDB_CLIENT_SECRET)
                 parameter("grant_type", "client_credentials")
@@ -78,6 +79,7 @@ class IgdbService {
         return try {
             httpClient.post("https://api.igdb.com/v4/games") {
                 headers {
+                    // This reference will now be resolved
                     append("Client-ID", BuildConfig.IGDB_CLIENT_ID)
                     append("Authorization", "Bearer ${token.accessToken}")
                 }
@@ -106,6 +108,7 @@ class IgdbService {
         return try {
             httpClient.post("https://api.igdb.com/v4/games") {
                 headers {
+                    // This reference will now be resolved
                     append("Client-ID", BuildConfig.IGDB_CLIENT_ID)
                     append("Authorization", "Bearer ${token.accessToken}")
                 }
