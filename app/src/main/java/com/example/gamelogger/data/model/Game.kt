@@ -1,4 +1,4 @@
-package com.example.gamelogger
+package com.example.gamelogger.data.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

@@ -3,21 +3,12 @@ package com.example.gamelogger
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,18 +18,19 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.example.gamelogger.ui.navigation.AppDestinations
+import com.example.gamelogger.ui.navigation.AppNavHost
 import com.example.gamelogger.ui.theme.GameLoggerTheme
 
 class MainActivity : ComponentActivity() {
-
-    private val viewModel: GameLoggerViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +40,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    GameLoggerApp(viewModel = viewModel)
+                    GameLoggerMainApp()
                 }
             }
         }
@@ -57,7 +49,9 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameLoggerApp(viewModel: GameLoggerViewModel) {
+fun GameLoggerMainApp() {
+    val navController = rememberNavController()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -65,69 +59,70 @@ fun GameLoggerApp(viewModel: GameLoggerViewModel) {
             )
         },
         bottomBar = {
-            BottomAppBar {
-                IconButton(onClick = { viewModel.fetchTop20TrendingGames() }) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "Refresh"
-                    )
-                }
-            }
+            AppBottomBar(navController = navController)
         }
     ) { innerPadding ->
-        Box(
+        AppNavHost(
+            navController = navController,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
-            contentAlignment = Alignment.Center
-        ) {
-            if (viewModel.isLoading) {
-                CircularProgressIndicator()
-            } else {
-                GameGrid(games = viewModel.games)
-            }
-        }
-    }
-}
-
-@Composable
-fun GameGrid(games: List<Game>) {
-    if (games.isEmpty()) {
-        Text(
-            text = "No games found.\nCheck Logcat for errors and try refreshing.",
-            textAlign = TextAlign.Center
+                .padding(innerPadding)
         )
-    } else {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(games) { game ->
-                GameCard(game = game)
-            }
-        }
     }
 }
 
 @Composable
-fun GameCard(game: Game) {
-    Card {
-        Column(
-            modifier = Modifier.padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+fun AppBottomBar(navController: NavHostController) {
+    BottomAppBar {
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentDestination = navBackStackEntry?.destination
+
+        // Home / Discover
+        IconButton(
+            onClick = {
+                navController.navigate(AppDestinations.DISCOVER) {
+                    // Pop up to the start destination to avoid building a large back stack
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true // Avoid re-launching the same screen
+                    restoreState = true // Restore state when re-selecting
+                }
+            },
+            modifier = Modifier.weight(1f)
         ) {
-            AsyncImage(
-                model = game.cover?.smallCoverUrl,
-                contentDescription = game.name,
-                modifier = Modifier.size(128.dp),
-                contentScale = ContentScale.Crop
+            Icon(
+                imageVector = Icons.Default.Home,
+                contentDescription = "Discover",
+                tint = if (currentDestination?.hierarchy?.any { it.route == AppDestinations.DISCOVER } == true) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
             )
-            Text(
-                text = game.name,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 8.dp)
+        }
+
+        // Search
+        IconButton(
+            onClick = {
+                navController.navigate(AppDestinations.SEARCH) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
+            modifier = Modifier.weight(1f)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Search",
+                tint = if (currentDestination?.hierarchy?.any { it.route == AppDestinations.SEARCH } == true) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
             )
         }
     }

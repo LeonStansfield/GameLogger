@@ -1,4 +1,4 @@
-package com.example.gamelogger
+package com.example.gamelogger.ui.features.discover // New package
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -6,9 +6,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.gamelogger.data.model.Game // Updated import
+import com.example.gamelogger.data.remote.IgdbService // Updated import
 import kotlinx.coroutines.launch
 
-class GameLoggerViewModel : ViewModel() {
+// Renamed from GameLoggerViewModel
+class DiscoverViewModel : ViewModel() {
 
     private val igdbService = IgdbService()
 
@@ -28,10 +31,10 @@ class GameLoggerViewModel : ViewModel() {
             try {
                 games = igdbService.getTop20TrendingGames()
                 if (games.isEmpty()) {
-                    Log.d("GameLoggerViewModel", "Fetched games list is empty.")
+                    Log.d("DiscoverViewModel", "Fetched games list is empty.")
                 }
             } catch (e: Exception) {
-                Log.e("GameLoggerViewModel", "Exception fetching games", e)
+                Log.e("DiscoverViewModel", "Exception fetching games", e)
             } finally {
                 isLoading = false
             }
