@@ -1,43 +1,31 @@
 package com.example.gamelogger.ui.theme
 
-import android.app.Activity
 import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+private val AppDarkColorScheme = darkColorScheme(
+    primary = LGM_Dark_Blue,
+    secondary = LGM_Grey_Blue,
+    tertiary = LGM_Light_Grey,
+    background = LGM_Near_Black,
+    surface = LGM_Near_Black,
+    onPrimary = LGM_Off_White,
+    onSecondary = LGM_Off_White,
+    onTertiary = LGM_Off_White,
+    onBackground = LGM_Off_White,
+    onSurface = LGM_Off_White
 )
 
 @Composable
 fun GameLoggerTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true, // Default to dark theme
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Disable dynamic color to use our palette
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -46,8 +34,8 @@ fun GameLoggerTheme(
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        darkTheme -> AppDarkColorScheme
+        else -> AppDarkColorScheme // Use dark for light theme as well
     }
 
     MaterialTheme(

@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -26,7 +27,7 @@ fun GameCard(game: Game, modifier: Modifier = Modifier) {
         ) {
             // Image: Fills the available space, cropping to fit
             AsyncImage(
-                model = game.cover?.smallCoverUrl,
+                model = game.cover?.bigCoverUrl,
                 contentDescription = "${game.name} poster",
                 modifier = Modifier
                     .fillMaxWidth()
@@ -42,6 +43,7 @@ fun GameCard(game: Game, modifier: Modifier = Modifier) {
                     .padding(8.dp)
                     .height(40.dp), // Fixed height for ~2 lines
                 style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis // Add '...' for long text
             )

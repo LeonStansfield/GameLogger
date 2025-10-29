@@ -17,4 +17,6 @@ data class Cover(
 ) {
     val smallCoverUrl: String
         get() = "https://images.igdb.com/igdb/image/upload/t_cover_small/${imageId}.jpg"
+    val bigCoverUrl: String
+        get() = "https://images.igdb.com/igdb/image/upload/t_cover_big/${imageId}.jpg"
 }

@@ -16,9 +16,10 @@
  - Loading & error states
     - Network/no-network handling
  - Unit tests
- - Wireframes for all screens
 
 #### Gracie:
+ - Wireframes for all screens
+ - Figma Composites for some screens
 
 #### Leon:
  - ~~Repository set up~~
