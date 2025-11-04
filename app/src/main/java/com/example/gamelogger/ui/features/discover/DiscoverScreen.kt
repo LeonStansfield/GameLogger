@@ -18,11 +18,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel // Import viewmodel creator
 import com.example.gamelogger.data.model.Game
 import com.example.gamelogger.ui.composables.GameCard
+import com.example.gamelogger.ui.navigation.AppDestinations
+import androidx.navigation.NavHostController
 
 // Renamed from GameLoggerApp to DiscoverScreen
 // Removed the Scaffold, TopAppBar, and BottomAppBar
 @Composable
-fun DiscoverScreen() {
+fun DiscoverScreen(
+    navController: NavHostController
+) {
     // Get the ViewModel for this screen
     val viewModel: DiscoverViewModel = viewModel()
 
@@ -33,13 +37,23 @@ fun DiscoverScreen() {
         if (viewModel.isLoading) {
             CircularProgressIndicator()
         } else {
-            GameGrid(games = viewModel.games)
+            GameGrid(
+                games = viewModel.games,
+                onGameClick = { game ->
+                    navController.navigate(
+                        "${AppDestinations.GAME_DETAILS}/${game.id}"
+                    )
+                }
+            )
         }
     }
 }
 
 @Composable
-private fun GameGrid(games: List<Game>) {
+private fun GameGrid(
+    games: List<Game>,
+    onGameClick: (Game) -> Unit
+) {
     if (games.isEmpty()) {
         Text(
             text = "No games found.\nCheck Logcat for errors and try refreshing.",
@@ -55,7 +69,8 @@ private fun GameGrid(games: List<Game>) {
             items(games) { game ->
                 GameCard(
                     game = game,
-                    modifier = Modifier.height(250.dp)
+                    modifier = Modifier.height(250.dp),
+                    onClick = { onGameClick(game) }
                 )
             }
         }

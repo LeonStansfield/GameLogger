@@ -21,43 +21,57 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gamelogger.data.model.Game
 import com.example.gamelogger.ui.composables.GameCard
+import com.example.gamelogger.ui.navigation.AppDestinations
+import androidx.navigation.NavHostController
 
 @Composable
-fun SearchScreen() {
+fun SearchScreen(
+    navController: NavHostController
+) {
     val viewModel: SearchViewModel = viewModel()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // Search Bar
-        OutlinedTextField(
-            value = viewModel.searchQuery,
-            onValueChange = { viewModel.onSearchQueryChanged(it) },
-            label = { Text("Search for a game...") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
-        )
-
-        // Content Area
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 16.dp),
-            contentAlignment = Alignment.Center
+                .padding(16.dp)
         ) {
-            if (viewModel.isLoading) {
-                CircularProgressIndicator()
-            } else {
-                SearchGameGrid(games = viewModel.games)
+            // Search Bar
+            OutlinedTextField(
+                value = viewModel.searchQuery,
+                onValueChange = { viewModel.onSearchQueryChanged(it) },
+                label = { Text("Search for a game...") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+
+            // Content Area
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                if (viewModel.isLoading) {
+                    CircularProgressIndicator()
+                } else {
+                    SearchGameGrid(
+                        games = viewModel.games,
+                        onGameClick = { game ->
+                            navController.navigate(
+                                "${AppDestinations.GAME_DETAILS}/${game.id}"
+                            )
+                        }
+                    )
+                }
             }
         }
     }
-}
 
 @Composable
-private fun SearchGameGrid(games: List<Game>) {
+private fun SearchGameGrid(
+    games: List<Game>,
+    onGameClick: (Game) -> Unit
+) {
     if (games.isEmpty()) {
         Text(
             text = "Search for games to see results.",
@@ -73,7 +87,8 @@ private fun SearchGameGrid(games: List<Game>) {
             items(games) { game ->
                 GameCard(
                     game = game,
-                    modifier = Modifier.height(250.dp)
+                    modifier = Modifier.height(250.dp),
+                    onClick = { onGameClick(game) }
                 )
             }
         }

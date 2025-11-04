@@ -1,5 +1,6 @@
 package com.example.gamelogger.ui.composables
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,8 +20,13 @@ import coil.compose.AsyncImage
 import com.example.gamelogger.data.model.Game
 
 @Composable
-fun GameCard(game: Game, modifier: Modifier = Modifier) {
-    Card(modifier = modifier) {
+fun GameCard(game: Game,
+             modifier: Modifier = Modifier,
+             onClick: () -> Unit) {
+    Card(
+        modifier = modifier
+            .clickable(onClick = onClick)
+    ) {
         Column(
             // This Column will fill the height given by the modifier
             horizontalAlignment = Alignment.CenterHorizontally
