@@ -5,6 +5,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.gamelogger.ui.features.backlog.BacklogScreen
+import com.example.gamelogger.ui.features.diary.DiaryScreen
 import com.example.gamelogger.ui.features.discover.DiscoverScreen
 import com.example.gamelogger.ui.features.search.SearchScreen
 
@@ -12,6 +14,9 @@ import com.example.gamelogger.ui.features.search.SearchScreen
 object AppDestinations {
     const val DISCOVER = "discover"
     const val SEARCH = "search"
+    const val DIARY = "diary"
+
+    const val BACKLOG = "backlog"
 }
 
 @Composable
@@ -30,7 +35,11 @@ fun AppNavHost(
         composable(AppDestinations.SEARCH) {
             SearchScreen()
         }
-        // Future screens go here
-        // composable(AppDestinations.DIARY) { DiaryScreen() }
+        composable(AppDestinations.DIARY) {
+            DiaryScreen()
+        }
+        composable(AppDestinations.BACKLOG) {
+            BacklogScreen()
+        }
     }
 }

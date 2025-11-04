@@ -6,6 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomAppBar
@@ -128,6 +130,52 @@ fun AppBottomBar(navController: NavHostController) {
                 imageVector = Icons.Default.Search,
                 contentDescription = "Search",
                 tint = if (currentDestination?.hierarchy?.any { it.route == AppDestinations.SEARCH } == true) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
+            )
+        }
+        // Diary
+        IconButton(
+            onClick = {
+                navController.navigate(AppDestinations.DIARY) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
+            modifier = Modifier.weight(1f)
+        ) {
+            Icon(
+                imageVector = Icons.Default.AutoStories,
+                contentDescription = "Diary",
+                tint = if (currentDestination?.hierarchy?.any { it.route == AppDestinations.DIARY } == true) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
+            )
+        }
+        // Backlog
+        IconButton(
+            onClick = {
+                navController.navigate(AppDestinations.BACKLOG) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
+            modifier = Modifier.weight(1f)
+        ) {
+            Icon(
+                imageVector = Icons.Default.ClearAll,
+                contentDescription = "Backlog",
+                tint = if (currentDestination?.hierarchy?.any { it.route == AppDestinations.BACKLOG } == true) {
                     MaterialTheme.colorScheme.primary
                 } else {
                     MaterialTheme.colorScheme.onSurface
