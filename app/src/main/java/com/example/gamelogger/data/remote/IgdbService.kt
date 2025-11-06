@@ -85,7 +85,7 @@ class IgdbService {
                 }
                 contentType(ContentType.Application.Json)
                 setBody(
-                    "fields name, cover.image_id, first_release_date, total_rating, total_rating_count; " +
+                    "fields id, name, cover.image_id, first_release_date, total_rating, total_rating_count; " +
                             "where first_release_date > $twoYearsAgoTimestamp & total_rating_count > 25; " +
                             "sort total_rating desc; " +
                             "limit 20;"
@@ -116,13 +116,44 @@ class IgdbService {
                 setBody(
                     // Using the "search" keyword and limiting to 20 results
                     "search \"$query\"; " +
-                            "fields name, cover.image_id; " +
+                            "fields id name, cover.image_id; " +
                             "limit 20;"
                 )
             }.body()
         } catch (e: Exception) {
             Log.e("IgdbService", "Error searching games", e)
             emptyList()
+        }
+    }
+    suspend fun getGameDetails(gameId: Int): Game? {
+        val token = getAuthTokenIfNeeded()
+        if (token == null) {
+            Log.e("IgdbService", "Auth token is null, cannot fetch game details.")
+            return null
+        }
+
+        // This APICalypse query requests all the fields from your GameDetails model
+        val apiQuery = "fields id, name, cover.image_id, artworks.image_id, genres.name, " +
+                "summary, first_release_date; " +
+                "where id = $gameId; " +
+                "limit 1;"
+
+        return try {
+            val response = httpClient.post("https://api.igdb.com/v4/games") {
+                headers {
+                    append("Client-ID", BuildConfig.IGDB_CLIENT_ID)
+                    append("Authorization", "Bearer ${token.accessToken}")
+                }
+                contentType(ContentType.Application.Json)
+                setBody(apiQuery)
+            }
+
+            // The API returns a list, even for a single ID. We take the first result.
+            response.body<List<Game>>().firstOrNull()
+
+        } catch (e: Exception) {
+            Log.e("IgdbService", "Error fetching game details for ID $gameId", e)
+            null
         }
     }
 }

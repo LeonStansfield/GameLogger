@@ -54,11 +54,11 @@ fun AppNavHost(
         composable(
             route = AppDestinations.gameDetailsRoute, // Use the path with argument
             arguments = listOf(navArgument(AppDestinations.GAME_ID_ARG) { // Define argument
-                type = NavType.StringType // Or IntType if your ID is an Int
+                type = NavType.IntType // Or IntType if your ID is an Int
             })
         ) { backStackEntry ->
             // Extract the argument
-            val gameId = backStackEntry.arguments?.getString(AppDestinations.GAME_ID_ARG)
+            val gameId = backStackEntry.arguments?.getInt(AppDestinations.GAME_ID_ARG)
 
             if (gameId != null) {
                 GameDetailsScreen(
