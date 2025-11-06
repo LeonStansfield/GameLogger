@@ -12,6 +12,7 @@ import com.example.gamelogger.ui.features.diary.DiaryScreen
 import com.example.gamelogger.ui.features.discover.DiscoverScreen
 import com.example.gamelogger.ui.features.search.SearchScreen
 import com.example.gamelogger.ui.features.gameDetails.GameDetailsScreen
+import com.example.gamelogger.ui.features.loggame.LogGameScreen
 
 // Define navigation routes
 object AppDestinations {
@@ -23,6 +24,9 @@ object AppDestinations {
     const val GAME_DETAILS = "gameDetails"
     const val GAME_ID_ARG = "gameID"
     val gameDetailsRoute = "$GAME_DETAILS/{$GAME_ID_ARG}"
+
+    const val LOG_GAME = "logGame"
+    val logGameRoute = "$LOG_GAME/{$GAME_ID_ARG}"
 }
 
 @Composable
@@ -59,7 +63,25 @@ fun AppNavHost(
             if (gameId != null) {
                 GameDetailsScreen(
                     gameId = gameId,
-                    onBackClick = { navController.popBackStack() } // Pass a back action
+                    onBackClick = { navController.popBackStack() }, // Pass a back action
+                    onLogGameClick = {
+                        navController.navigate("${AppDestinations.LOG_GAME}/$gameId")
+                    }
+                )
+            }
+        }
+        composable(
+            route = AppDestinations.logGameRoute,
+            arguments = listOf(navArgument(AppDestinations.GAME_ID_ARG) {
+                type = NavType.StringType
+            })
+        ) { backStackEntry ->
+            val gameId = backStackEntry.arguments?.getString(AppDestinations.GAME_ID_ARG)
+
+            if (gameId != null) {
+                LogGameScreen(
+                    gameId = gameId,
+                    onBackClick = { navController.popBackStack() }
                 )
             }
         }
