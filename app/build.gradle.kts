@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlinx.serialization)
+    id("androidx.room")
 }
 
 // Load properties from local.properties
@@ -62,9 +63,15 @@ android {
         compose = true
         buildConfig = true // Make sure this is enabled
     }
+
+    room {
+        schemaDirectory("$projectDir/schemas")
+    }
 }
 
 dependencies {
+    val room_version = "2.8.3"
+    implementation("androidx.room:room-runtime:$room_version")
     // ... your other dependencies
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
