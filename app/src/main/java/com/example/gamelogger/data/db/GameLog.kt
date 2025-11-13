@@ -13,8 +13,7 @@ enum class GameStatus {
 
 @Entity(tableName = "game_logs")
 data class GameLog(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    @PrimaryKey
     val gameId: String,
     val status: GameStatus,
     val playTime: Long, // in hours

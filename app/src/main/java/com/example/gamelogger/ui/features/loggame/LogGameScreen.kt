@@ -19,6 +19,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,8 +47,15 @@ fun LogGameScreen(
         )
     )
 ) {
+    val gameLog by viewModel.gameLog.collectAsState()
     var selectedStatus by remember { mutableStateOf<GameStatus?>(null) }
     val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(gameLog) {
+        gameLog?.let {
+            selectedStatus = it.status
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -146,7 +155,7 @@ fun LogGameScreen(
                 onClick = {
                     coroutineScope.launch {
                         selectedStatus?.let {
-                            viewModel.saveGameLog(it, 0, null) // Play time and rating are not implemented yet
+                            viewModel.saveGameLog(it, gameLog?.playTime ?: 0, gameLog?.userRating)
                         }
                         onBackClick()
                     }
