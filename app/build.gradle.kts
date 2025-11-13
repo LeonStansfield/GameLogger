@@ -6,7 +6,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlinx.serialization)
-    id("androidx.room")
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
+    //id("com.google.devtools.ksp")
 }
 
 // Load properties from local.properties
@@ -70,11 +72,16 @@ android {
 }
 
 dependencies {
-    val room_version = "2.8.3"
-    implementation("androidx.room:room-runtime:$room_version")
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+    //implementation(libs.androidx.room.compiler)
+
+    //ksp("androidx.room:room-compiler:$room_version")
     // ... your other dependencies
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
