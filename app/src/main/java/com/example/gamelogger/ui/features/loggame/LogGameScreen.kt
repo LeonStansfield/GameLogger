@@ -22,18 +22,31 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.gamelogger.data.db.GameLoggerDatabase
+import com.example.gamelogger.data.db.GameStatus
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogGameScreen(
     gameId: String,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    viewModel: LogGameViewModel = viewModel(
+        factory = LogGameViewModelFactory(
+            GameLoggerDatabase.getDatabase(LocalContext.current).gameLogDao(),
+            gameId
+        )
+    )
 ) {
-    var selectedStatus by remember { mutableStateOf<String?>(null) }
+    var selectedStatus by remember { mutableStateOf<GameStatus?>(null) }
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -73,20 +86,37 @@ fun LogGameScreen(
             ) {
                 StatusButton(
                     text = "Played",
-                    isSelected = selectedStatus == "Played",
-                    onClick = { selectedStatus = "Played" },
+                    isSelected = selectedStatus == GameStatus.PLAYED,
+                    onClick = { selectedStatus = GameStatus.PLAYED },
                     modifier = Modifier.weight(1f)
                 )
                 StatusButton(
                     text = "Playing",
-                    isSelected = selectedStatus == "Playing",
-                    onClick = { selectedStatus = "Playing" },
+                    isSelected = selectedStatus == GameStatus.PLAYING,
+                    onClick = { selectedStatus = GameStatus.PLAYING },
                     modifier = Modifier.weight(1f)
                 )
                 StatusButton(
                     text = "Backlog",
-                    isSelected = selectedStatus == "Backlog",
-                    onClick = { selectedStatus = "Backlog" },
+                    isSelected = selectedStatus == GameStatus.BACKLOGGED,
+                    onClick = { selectedStatus = GameStatus.BACKLOGGED },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                StatusButton(
+                    text = "Dropped",
+                    isSelected = selectedStatus == GameStatus.DROPPED,
+                    onClick = { selectedStatus = GameStatus.DROPPED },
+                    modifier = Modifier.weight(1f)
+                )
+                StatusButton(
+                    text = "On Hold",
+                    isSelected = selectedStatus == GameStatus.ON_HOLD,
+                    onClick = { selectedStatus = GameStatus.ON_HOLD },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -114,8 +144,12 @@ fun LogGameScreen(
             // Save button
             Button(
                 onClick = {
-                    // TODO: Save to Room database
-                    onBackClick()
+                    coroutineScope.launch {
+                        selectedStatus?.let {
+                            viewModel.saveGameLog(it, 0, null) // Play time and rating are not implemented yet
+                        }
+                        onBackClick()
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = selectedStatus != null
@@ -149,4 +183,3 @@ private fun StatusButton(
         }
     }
 }
-

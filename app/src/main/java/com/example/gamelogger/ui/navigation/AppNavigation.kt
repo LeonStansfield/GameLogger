@@ -70,6 +70,7 @@ fun AppNavHost(
                 )
             }
         }
+        // Log game route - after navigating from game details
         composable(
             route = AppDestinations.logGameRoute,
             arguments = listOf(navArgument(AppDestinations.GAME_ID_ARG) {
