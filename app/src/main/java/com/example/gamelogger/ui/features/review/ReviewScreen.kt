@@ -15,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,7 +42,14 @@ fun ReviewScreen(
     )
 ) {
     val gameLog by viewModel.gameLog.collectAsState()
-    var reviewText by remember { mutableStateOf(gameLog?.review ?: "") }
+    var reviewText by remember { mutableStateOf("") }
+
+    // Update reviewText when gameLog is loaded
+    LaunchedEffect(gameLog) {
+        gameLog?.review?.let { existingReview ->
+            reviewText = existingReview
+        }
+    }
 
     Scaffold(
         topBar = {
