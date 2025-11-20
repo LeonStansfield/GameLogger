@@ -25,7 +25,8 @@ class LogGameViewModel(
                 status = status,
                 playTime = playTime,
                 userRating = userRating,
-                review = review
+                review = review,
+                lastStatusDate = System.currentTimeMillis() // Set current timestamp
             )
             gameLogDao.insertOrUpdateGameLog(gameLog)
         }
@@ -35,6 +36,7 @@ class LogGameViewModel(
         viewModelScope.launch {
             val currentLog = gameLog.value
             if (currentLog != null) {
+                // Preserve the lastStatusDate when only updating review
                 val updatedLog = currentLog.copy(review = review)
                 gameLogDao.insertOrUpdateGameLog(updatedLog)
             }

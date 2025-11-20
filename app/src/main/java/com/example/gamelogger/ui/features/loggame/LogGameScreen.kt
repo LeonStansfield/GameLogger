@@ -14,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gamelogger.data.db.GameLoggerDatabase
 import com.example.gamelogger.data.db.GameStatus
+import com.example.gamelogger.util.formatRelativeTime
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,6 +89,15 @@ fun LogGameScreen(
                 text = "Log game ID: $gameId",
                 fontSize = 18.sp
             )
+
+            // Display last status update date if available
+            gameLog?.let {
+                Text(
+                    text = "Last updated: ${formatRelativeTime(it.lastStatusDate)}",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
