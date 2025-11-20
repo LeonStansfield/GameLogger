@@ -40,6 +40,7 @@ import kotlinx.coroutines.launch
 fun LogGameScreen(
     gameId: String,
     onBackClick: () -> Unit,
+    onNavigateToReview: (String, String?) -> Unit,
     viewModel: LogGameViewModel = viewModel(
         factory = LogGameViewModelFactory(
             GameLoggerDatabase.getDatabase(LocalContext.current).gameLogDao(),
@@ -49,11 +50,14 @@ fun LogGameScreen(
 ) {
     val gameLog by viewModel.gameLog.collectAsState()
     var selectedStatus by remember { mutableStateOf<GameStatus?>(null) }
+    var selectedRating by remember { mutableStateOf<Float?>(null) }
+    var showRatingDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(gameLog) {
         gameLog?.let {
             selectedStatus = it.status
+            selectedRating = it.userRating
         }
     }
 
@@ -132,20 +136,34 @@ fun LogGameScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Rating button (placeholder)
+            // Rating button
             OutlinedButton(
-                onClick = { /* TODO: Open rating dialog */ },
+                onClick = { showRatingDialog = true },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Add Rating")
+                Text(
+                    if (selectedRating != null) {
+                        "Rating: $selectedRating ★"
+                    } else {
+                        "Add Rating"
+                    }
+                )
             }
 
-            // Review button (placeholder)
+            // Review button
             OutlinedButton(
-                onClick = { /* TODO: Open review screen */ },
+                onClick = {
+                    onNavigateToReview(gameId, gameLog?.review)
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Add Review")
+                Text(
+                    if (gameLog?.review?.isNotEmpty() == true) {
+                        "Edit Review"
+                    } else {
+                        "Add Review"
+                    }
+                )
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -155,7 +173,12 @@ fun LogGameScreen(
                 onClick = {
                     coroutineScope.launch {
                         selectedStatus?.let {
-                            viewModel.saveGameLog(it, gameLog?.playTime ?: 0, gameLog?.userRating)
+                            viewModel.saveGameLog(
+                                it,
+                                gameLog?.playTime ?: 0,
+                                selectedRating,
+                                gameLog?.review
+                            )
                         }
                         onBackClick()
                     }
@@ -165,6 +188,18 @@ fun LogGameScreen(
             ) {
                 Text("Save")
             }
+        }
+
+        // Rating Dialog
+        if (showRatingDialog) {
+            RatingDialog(
+                currentRating = selectedRating,
+                onRatingSelected = { rating ->
+                    selectedRating = rating
+                    showRatingDialog = false
+                },
+                onDismiss = { showRatingDialog = false }
+            )
         }
     }
 }

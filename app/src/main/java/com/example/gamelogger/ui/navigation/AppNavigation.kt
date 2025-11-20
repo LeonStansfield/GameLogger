@@ -13,6 +13,7 @@ import com.example.gamelogger.ui.features.discover.DiscoverScreen
 import com.example.gamelogger.ui.features.search.SearchScreen
 import com.example.gamelogger.ui.features.gameDetails.GameDetailsScreen
 import com.example.gamelogger.ui.features.loggame.LogGameScreen
+import com.example.gamelogger.ui.features.review.ReviewScreen
 
 // Define navigation routes
 object AppDestinations {
@@ -27,6 +28,9 @@ object AppDestinations {
 
     const val LOG_GAME = "logGame"
     val logGameRoute = "$LOG_GAME/{$GAME_ID_ARG}"
+
+    const val REVIEW = "review"
+    val reviewRoute = "$REVIEW/{$GAME_ID_ARG}"
 }
 
 @Composable
@@ -81,6 +85,28 @@ fun AppNavHost(
 
             if (gameId != null) {
                 LogGameScreen(
+                    gameId = gameId,
+                    onBackClick = { navController.popBackStack() },
+                    onNavigateToReview = { id, _ ->
+                        navController.navigate("${AppDestinations.REVIEW}/$id")
+                    }
+                )
+            }
+        }
+
+        // Review screen route
+        composable(
+            route = AppDestinations.reviewRoute,
+            arguments = listOf(
+                navArgument(AppDestinations.GAME_ID_ARG) {
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+            val gameId = backStackEntry.arguments?.getString(AppDestinations.GAME_ID_ARG)
+
+            if (gameId != null) {
+                ReviewScreen(
                     gameId = gameId,
                     onBackClick = { navController.popBackStack() }
                 )

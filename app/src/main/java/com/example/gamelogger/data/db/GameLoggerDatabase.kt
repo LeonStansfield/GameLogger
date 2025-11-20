@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [GameLog::class], version = 2, exportSchema = false)
+@Database(entities = [GameLog::class], version = 3, exportSchema = false)
 abstract class GameLoggerDatabase : RoomDatabase() {
 
     abstract fun gameLogDao(): GameLogDao

@@ -18,15 +18,26 @@ class LogGameViewModel(
     val gameLog: StateFlow<GameLog?> = gameLogDao.getGameLog(gameId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    fun saveGameLog(status: GameStatus, playTime: Long, userRating: Float?) {
+    fun saveGameLog(status: GameStatus, playTime: Long, userRating: Float?, review: String? = null) {
         viewModelScope.launch {
             val gameLog = GameLog(
                 gameId = gameId,
                 status = status,
                 playTime = playTime,
-                userRating = userRating
+                userRating = userRating,
+                review = review
             )
             gameLogDao.insertOrUpdateGameLog(gameLog)
+        }
+    }
+
+    fun updateReview(review: String) {
+        viewModelScope.launch {
+            val currentLog = gameLog.value
+            if (currentLog != null) {
+                val updatedLog = currentLog.copy(review = review)
+                gameLogDao.insertOrUpdateGameLog(updatedLog)
+            }
         }
     }
 }
