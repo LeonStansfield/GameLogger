@@ -21,6 +21,19 @@ private val AppDarkColorScheme = darkColorScheme(
     onSurface = LGM_Off_White
 )
 
+private val AppLightColorScheme = androidx.compose.material3.lightColorScheme(
+    primary = LGM_Dark_Blue,
+    secondary = LGM_Grey_Blue,
+    tertiary = LGM_Light_Grey,
+    background = LGM_Off_White,
+    surface = LGM_Off_White,
+    onPrimary = androidx.compose.ui.graphics.Color.White,
+    onSecondary = androidx.compose.ui.graphics.Color.White,
+    onTertiary = androidx.compose.ui.graphics.Color.White,
+    onBackground = LGM_Near_Black,
+    onSurface = LGM_Near_Black
+)
+
 @Composable
 fun GameLoggerTheme(
     darkTheme: Boolean = true, // Default to dark theme
@@ -35,7 +48,7 @@ fun GameLoggerTheme(
         }
 
         darkTheme -> AppDarkColorScheme
-        else -> AppDarkColorScheme // Use dark for light theme as well
+        else -> AppLightColorScheme
     }
 
     MaterialTheme(

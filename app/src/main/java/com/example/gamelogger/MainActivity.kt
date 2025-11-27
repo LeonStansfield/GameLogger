@@ -3,6 +3,7 @@ package com.example.gamelogger
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -10,6 +11,7 @@ import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,14 +23,20 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.gamelogger.data.AppTheme
+import com.example.gamelogger.data.ThemeRepository
+import com.example.gamelogger.ui.features.settings.SettingsViewModel
 import com.example.gamelogger.ui.navigation.AppDestinations
 import com.example.gamelogger.ui.navigation.AppNavHost
 import com.example.gamelogger.ui.theme.GameLoggerTheme
@@ -38,12 +46,23 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            GameLoggerTheme {
+            val context = LocalContext.current
+            val themeRepository = remember { ThemeRepository(context) }
+            val settingsViewModel = remember { SettingsViewModel(themeRepository) }
+            val currentTheme by settingsViewModel.currentTheme.collectAsState()
+
+            val isDarkTheme = when (currentTheme) {
+                AppTheme.System -> isSystemInDarkTheme()
+                AppTheme.Light -> false
+                AppTheme.Dark -> true
+            }
+
+            GameLoggerTheme(darkTheme = isDarkTheme) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    GameLoggerMainApp()
+                    GameLoggerMainApp(settingsViewModel)
                 }
             }
         }
@@ -52,7 +71,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameLoggerMainApp() {
+fun GameLoggerMainApp(settingsViewModel: SettingsViewModel) {
     val navController = rememberNavController()
 
     Scaffold(
@@ -66,7 +85,15 @@ fun GameLoggerMainApp() {
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
-                )
+                ),
+                actions = {
+                    IconButton(onClick = { navController.navigate(AppDestinations.SETTINGS) }) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings"
+                        )
+                    }
+                }
             )
         },
         bottomBar = {
@@ -77,7 +104,8 @@ fun GameLoggerMainApp() {
             navController = navController,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(innerPadding),
+            settingsViewModel = settingsViewModel
         )
     }
 }

@@ -14,6 +14,8 @@ import com.example.gamelogger.ui.features.search.SearchScreen
 import com.example.gamelogger.ui.features.gameDetails.GameDetailsScreen
 import com.example.gamelogger.ui.features.loggame.LogGameScreen
 import com.example.gamelogger.ui.features.review.ReviewScreen
+import com.example.gamelogger.ui.features.settings.SettingsScreen
+import com.example.gamelogger.ui.features.settings.SettingsViewModel
 
 // Define navigation routes
 object AppDestinations {
@@ -31,12 +33,15 @@ object AppDestinations {
 
     const val REVIEW = "review"
     val reviewRoute = "$REVIEW/{$GAME_ID_ARG}"
+
+    const val SETTINGS = "settings"
 }
 
 @Composable
 fun AppNavHost(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    settingsViewModel: SettingsViewModel
 ) {
     NavHost(
         navController = navController,
@@ -54,6 +59,12 @@ fun AppNavHost(
         }
         composable(AppDestinations.BACKLOG) {
             BacklogScreen()
+        }
+        composable(AppDestinations.SETTINGS) {
+            SettingsScreen(
+                viewModel = settingsViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
         }
         composable(
             route = AppDestinations.gameDetailsRoute, // Use the path with argument
