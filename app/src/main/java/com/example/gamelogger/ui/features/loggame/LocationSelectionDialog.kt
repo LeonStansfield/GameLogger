@@ -26,7 +26,9 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
+
 import com.google.maps.android.compose.rememberCameraPositionState
+import kotlinx.coroutines.launch
 
 @Composable
 fun LocationSelectionDialog(
@@ -44,6 +46,10 @@ fun LocationSelectionDialog(
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(startPos, 10f)
     }
+
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val geocoder = remember { android.location.Geocoder(context, java.util.Locale.getDefault()) }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -87,6 +93,44 @@ fun LocationSelectionDialog(
                     cameraPositionState = cameraPositionState,
                     onMapClick = { latLng ->
                         selectedLocation = latLng
+                        // Attempt to reverse geocode
+                        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                            try {
+                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                                    geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1) { addresses ->
+                                        if (addresses.isNotEmpty()) {
+                                            val address = addresses[0]
+                                            // Prioritize broader location names (Town/City) over specific streets/numbers
+                                            val name = address.locality 
+                                                ?: address.subAdminArea 
+                                                ?: address.adminArea 
+                                                ?: address.thoroughfare 
+                                                ?: ""
+                                            if (name.isNotEmpty()) {
+                                                locationName = name
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    @Suppress("DEPRECATION")
+                                    val addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
+                                    if (!addresses.isNullOrEmpty()) {
+                                        val address = addresses[0]
+                                        // Prioritize broader location names (Town/City) over specific streets/numbers
+                                        val name = address.locality 
+                                            ?: address.subAdminArea 
+                                            ?: address.adminArea 
+                                            ?: address.thoroughfare 
+                                            ?: ""
+                                        if (name.isNotEmpty()) {
+                                            locationName = name
+                                        }
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
                     }
                 ) {
                     selectedLocation?.let {

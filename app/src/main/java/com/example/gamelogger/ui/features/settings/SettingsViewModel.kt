@@ -10,7 +10,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
-    private val themeRepository: ThemeRepository
+    private val themeRepository: ThemeRepository,
+    private val gameLogDao: com.example.gamelogger.data.db.GameLogDao
 ) : ViewModel() {
 
     val currentTheme: StateFlow<AppTheme> = themeRepository.theme
@@ -23,6 +24,12 @@ class SettingsViewModel(
     fun setTheme(theme: AppTheme) {
         viewModelScope.launch {
             themeRepository.setTheme(theme)
+        }
+    }
+
+    fun clearAllData() {
+        viewModelScope.launch {
+            gameLogDao.deleteAllGameLogs()
         }
     }
 }

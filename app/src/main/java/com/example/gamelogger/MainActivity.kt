@@ -35,6 +35,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.gamelogger.data.AppTheme
+import com.example.gamelogger.data.db.GameLoggerDatabase
 import com.example.gamelogger.data.ThemeRepository
 import com.example.gamelogger.ui.features.settings.SettingsViewModel
 import com.example.gamelogger.ui.navigation.AppDestinations
@@ -48,7 +49,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             val context = LocalContext.current
             val themeRepository = remember { ThemeRepository(context) }
-            val settingsViewModel = remember { SettingsViewModel(themeRepository) }
+            val database = remember { GameLoggerDatabase.getDatabase(context) }
+            val settingsViewModel = remember { 
+                SettingsViewModel(
+                    themeRepository = themeRepository,
+                    gameLogDao = database.gameLogDao()
+                ) 
+            }
             val currentTheme by settingsViewModel.currentTheme.collectAsState()
 
             val isDarkTheme = when (currentTheme) {

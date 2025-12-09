@@ -17,7 +17,12 @@ interface GameLogDao {
     @Query("SELECT * FROM game_logs WHERE gameId = :gameId")
     fun getGameLog(gameId: String): Flow<GameLog?>
 
+
+
     @Query("SELECT * FROM game_logs")
     fun getAllGameLogs(): Flow<List<GameLog>>
+
+    @Query("DELETE FROM game_logs")
+    suspend fun deleteAllGameLogs()
 }
 
