@@ -22,6 +22,8 @@ data class GameLog(
     val lastStatusDate: Long = System.currentTimeMillis(), // Timestamp of last status update
     val latitude: Double? = null,
     val longitude: Double? = null,
-    val locationName: String? = null
+    val locationName: String? = null,
+    val title: String? = null,
+    val posterUrl: String? = null
 )
 

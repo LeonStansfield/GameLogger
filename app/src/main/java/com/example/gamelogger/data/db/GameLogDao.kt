@@ -11,6 +11,9 @@ interface GameLogDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdateGameLog(gameLog: GameLog)
 
+    @androidx.room.Delete
+    suspend fun deleteGameLog(gameLog: GameLog)
+
     @Query("SELECT * FROM game_logs WHERE gameId = :gameId")
     fun getGameLog(gameId: String): Flow<GameLog?>
 

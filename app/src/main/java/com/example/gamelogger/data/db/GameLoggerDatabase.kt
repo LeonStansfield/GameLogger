@@ -9,8 +9,11 @@ import androidx.room.AutoMigration
 
 @Database(
     entities = [GameLog::class],
-    version = 5,
-    exportSchema = true
+    version = 6,
+    exportSchema = true,
+    autoMigrations = [
+        AutoMigration (from = 5, to = 6)
+    ]
 )
 abstract class GameLoggerDatabase : RoomDatabase() {
 

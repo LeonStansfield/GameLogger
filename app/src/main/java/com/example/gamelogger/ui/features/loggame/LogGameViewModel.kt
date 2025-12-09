@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.gamelogger.data.db.GameLog
 import com.example.gamelogger.data.db.GameLogDao
 import com.example.gamelogger.data.db.GameStatus
+import com.example.gamelogger.data.remote.IgdbService
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -18,7 +19,9 @@ class LogGameViewModel(
     val gameLog: StateFlow<GameLog?> = gameLogDao.getGameLog(gameId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    fun saveGameLog(
+    private val igdbService = IgdbService()
+
+    suspend fun saveGameLog(
         status: GameStatus,
         playTime: Long,
         userRating: Float?,
@@ -27,20 +30,31 @@ class LogGameViewModel(
         longitude: Double? = null,
         locationName: String? = null
     ) {
-        viewModelScope.launch {
-            val gameLog = GameLog(
-                gameId = gameId,
-                status = status,
-                playTime = playTime,
-                userRating = userRating,
-                review = review,
-                lastStatusDate = System.currentTimeMillis(), // Set current timestamp
-                latitude = latitude,
-                longitude = longitude,
-                locationName = locationName
-            )
-            gameLogDao.insertOrUpdateGameLog(gameLog)
+        // Fetch game details to get title and poster
+        val details = try {
+            igdbService.getGameDetails(gameId.toInt())
+        } catch (e: Exception) {
+            null
         }
+
+        val currentLog = gameLog.value
+        val title = details?.name ?: currentLog?.title
+        val posterUrl = details?.cover?.bigCoverUrl ?: currentLog?.posterUrl
+
+        val gameLog = GameLog(
+            gameId = gameId,
+            status = status,
+            playTime = playTime,
+            userRating = userRating,
+            review = review,
+            lastStatusDate = System.currentTimeMillis(), // Set current timestamp
+            latitude = latitude,
+            longitude = longitude,
+            locationName = locationName,
+            title = title,
+            posterUrl = posterUrl
+        )
+        gameLogDao.insertOrUpdateGameLog(gameLog)
     }
 
     fun updateReview(review: String) {

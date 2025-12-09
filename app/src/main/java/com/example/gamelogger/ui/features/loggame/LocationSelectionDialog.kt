@@ -1,9 +1,14 @@
 package com.example.gamelogger.ui.features.loggame
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,7 +31,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 @Composable
 fun LocationSelectionDialog(
     initialLocation: LatLng? = null,
-    onLocationSelected: (Double, Double) -> Unit,
+    onLocationSelected: (Double, Double, String) -> Unit,
     onDismiss: () -> Unit
 ) {
     // Default to London if no location provided, just as a starting point
@@ -34,6 +39,7 @@ fun LocationSelectionDialog(
     val startPos = initialLocation ?: defaultLocation
 
     var selectedLocation by remember { mutableStateOf(initialLocation) }
+    var locationName by remember { mutableStateOf("") }
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(startPos, 10f)
@@ -44,22 +50,33 @@ fun LocationSelectionDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Scaffold(
-            topBar = { }, // Could add a header here
+            topBar = { }, 
             bottomBar = {
                 Box(
                     modifier = Modifier
                         .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Button(
-                        onClick = {
-                            selectedLocation?.let {
-                                onLocationSelected(it.latitude, it.longitude)
-                            }
-                        },
-                        enabled = selectedLocation != null
-                    ) {
-                        Text("Confirm Location")
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        OutlinedTextField(
+                            value = locationName,
+                            onValueChange = { locationName = it },
+                            label = { Text("Location Name (e.g. Home)") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Button(
+                            onClick = {
+                                selectedLocation?.let {
+                                    onLocationSelected(it.latitude, it.longitude, locationName.ifBlank { "Unknown Location" })
+                                }
+                            },
+                            enabled = selectedLocation != null,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Confirm Location")
+                        }
                     }
                 }
             }

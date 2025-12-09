@@ -55,7 +55,11 @@ fun AppNavHost(
             SearchScreen(navController = navController)
         }
         composable(AppDestinations.DIARY) {
-            DiaryScreen()
+            DiaryScreen(
+                onPosterClick = { gameId ->
+                    navController.navigate("${AppDestinations.GAME_DETAILS}/$gameId")
+                }
+            )
         }
         composable(AppDestinations.BACKLOG) {
             BacklogScreen()

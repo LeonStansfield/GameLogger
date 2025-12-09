@@ -29,6 +29,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -56,23 +61,32 @@ fun LogGameScreen(
     var selectedRating by remember { mutableStateOf<Float?>(null) }
     var selectedLatitude by remember { mutableStateOf<Double?>(null) }
     var selectedLongitude by remember { mutableStateOf<Double?>(null) }
+    var selectedLocationName by remember { mutableStateOf<String?>(null) }
+
     var showRatingDialog by remember { mutableStateOf(false) }
     var showLocationDialog by remember { mutableStateOf(false) }
+    var showReviewDialog by remember { mutableStateOf(false) }
+    var selectedReview by remember { mutableStateOf<String?>(null) }
+
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(gameLog) {
-        gameLog?.let {
-            selectedStatus = it.status
-            selectedRating = it.userRating
-            selectedLatitude = it.latitude
-            selectedLongitude = it.longitude
+        if (selectedStatus == null) {
+            gameLog?.let {
+                selectedStatus = it.status
+                selectedRating = it.userRating
+                selectedLatitude = it.latitude
+                selectedLongitude = it.longitude
+                selectedLocationName = it.locationName
+                selectedReview = it.review
+            }
         }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Log Game") },
+                title = { Text(text = "Log Game") },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
@@ -88,7 +102,8 @@ fun LogGameScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
@@ -109,7 +124,7 @@ fun LogGameScreen(
 
             Text(text = "Status", fontSize = 16.sp)
 
-            // Status buttons - similar to Backloggd
+            // Status buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -167,19 +182,25 @@ fun LogGameScreen(
                 )
             }
 
-            // Review button
+            // Review button (Dialog)
             OutlinedButton(
-                onClick = {
-                    onNavigateToReview(gameId, gameLog?.review)
-                },
+                onClick = { showReviewDialog = true },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    if (gameLog?.review?.isNotEmpty() == true) {
+                    if (!selectedReview.isNullOrBlank()) {
                         "Edit Review"
                     } else {
                         "Add Review"
                     }
+                )
+            }
+            if (!selectedReview.isNullOrBlank()) {
+                Text(
+                    text = selectedReview!!,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             
@@ -189,7 +210,9 @@ fun LogGameScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    if (selectedLatitude != null && selectedLongitude != null) {
+                    if (!selectedLocationName.isNullOrBlank()) {
+                        "Location: $selectedLocationName"
+                    } else if (selectedLatitude != null && selectedLongitude != null) {
                         "Location Selected"
                     } else {
                         "Add Location"
@@ -203,14 +226,15 @@ fun LogGameScreen(
             Button(
                 onClick = {
                     coroutineScope.launch {
-                        selectedStatus?.let {
+                        selectedStatus?.let { status ->
                             viewModel.saveGameLog(
-                                it,
-                                gameLog?.playTime ?: 0,
-                                selectedRating,
-                                gameLog?.review,
-                                selectedLatitude,
-                                selectedLongitude
+                                status = status,
+                                playTime = gameLog?.playTime ?: 0,
+                                userRating = selectedRating,
+                                review = selectedReview,
+                                latitude = selectedLatitude,
+                                longitude = selectedLongitude,
+                                locationName = selectedLocationName // Now correctly passing the name
                             )
                         }
                         onBackClick()
@@ -234,20 +258,34 @@ fun LogGameScreen(
                 onDismiss = { showRatingDialog = false }
             )
         }
-    }
 
-    if (showLocationDialog) {
-        LocationSelectionDialog(
-            initialLocation = if (selectedLatitude != null && selectedLongitude != null) {
-                LatLng(selectedLatitude!!, selectedLongitude!!)
-            } else null,
-            onLocationSelected = { lat, lng ->
-                selectedLatitude = lat
-                selectedLongitude = lng
-                showLocationDialog = false
-            },
-            onDismiss = { showLocationDialog = false }
-        )
+        // Location Dialog
+        if (showLocationDialog) {
+            LocationSelectionDialog(
+                initialLocation = if (selectedLatitude != null && selectedLongitude != null) {
+                    LatLng(selectedLatitude!!, selectedLongitude!!)
+                } else null,
+                onLocationSelected = { lat, lng, name ->
+                    selectedLatitude = lat
+                    selectedLongitude = lng
+                    selectedLocationName = name
+                    showLocationDialog = false
+                },
+                onDismiss = { showLocationDialog = false }
+            )
+        }
+
+        // Review Dialog
+        if (showReviewDialog) {
+            ReviewDialog(
+                initialReview = selectedReview,
+                onReviewSubmitted = { review ->
+                    selectedReview = review
+                    showReviewDialog = false
+                },
+                onDismiss = { showReviewDialog = false }
+            )
+        }
     }
 }
 
