@@ -5,7 +5,13 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [GameLog::class], version = 4, exportSchema = false)
+import androidx.room.AutoMigration
+
+@Database(
+    entities = [GameLog::class],
+    version = 5,
+    exportSchema = true
+)
 abstract class GameLoggerDatabase : RoomDatabase() {
 
     abstract fun gameLogDao(): GameLogDao
@@ -20,7 +26,7 @@ abstract class GameLoggerDatabase : RoomDatabase() {
                                 context.applicationContext,
                                 GameLoggerDatabase::class.java,
                                 "gamelogger_database"
-                            ).fallbackToDestructiveMigration(false)
+                            ).fallbackToDestructiveMigration(true)
                  .build()
                 INSTANCE = instance
                 instance

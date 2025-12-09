@@ -35,6 +35,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gamelogger.data.db.GameLoggerDatabase
 import com.example.gamelogger.data.db.GameStatus
 import com.example.gamelogger.util.formatRelativeTime
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,13 +54,18 @@ fun LogGameScreen(
     val gameLog by viewModel.gameLog.collectAsState()
     var selectedStatus by remember { mutableStateOf<GameStatus?>(null) }
     var selectedRating by remember { mutableStateOf<Float?>(null) }
+    var selectedLatitude by remember { mutableStateOf<Double?>(null) }
+    var selectedLongitude by remember { mutableStateOf<Double?>(null) }
     var showRatingDialog by remember { mutableStateOf(false) }
+    var showLocationDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(gameLog) {
         gameLog?.let {
             selectedStatus = it.status
             selectedRating = it.userRating
+            selectedLatitude = it.latitude
+            selectedLongitude = it.longitude
         }
     }
 
@@ -176,6 +182,20 @@ fun LogGameScreen(
                     }
                 )
             }
+            
+            // Location Button
+            OutlinedButton(
+                onClick = { showLocationDialog = true },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    if (selectedLatitude != null && selectedLongitude != null) {
+                        "Location Selected"
+                    } else {
+                        "Add Location"
+                    }
+                )
+            }
 
             Spacer(modifier = Modifier.weight(1f))
 
@@ -188,7 +208,9 @@ fun LogGameScreen(
                                 it,
                                 gameLog?.playTime ?: 0,
                                 selectedRating,
-                                gameLog?.review
+                                gameLog?.review,
+                                selectedLatitude,
+                                selectedLongitude
                             )
                         }
                         onBackClick()
@@ -212,6 +234,20 @@ fun LogGameScreen(
                 onDismiss = { showRatingDialog = false }
             )
         }
+    }
+
+    if (showLocationDialog) {
+        LocationSelectionDialog(
+            initialLocation = if (selectedLatitude != null && selectedLongitude != null) {
+                LatLng(selectedLatitude!!, selectedLongitude!!)
+            } else null,
+            onLocationSelected = { lat, lng ->
+                selectedLatitude = lat
+                selectedLongitude = lng
+                showLocationDialog = false
+            },
+            onDismiss = { showLocationDialog = false }
+        )
     }
 }
 
