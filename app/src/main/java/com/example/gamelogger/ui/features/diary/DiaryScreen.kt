@@ -20,6 +20,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
+import com.example.gamelogger.data.db.GameStatus
 import com.example.gamelogger.data.db.GameLog
 import com.example.gamelogger.data.db.GameLoggerDatabase
 import com.example.gamelogger.util.formatRelativeTime
@@ -35,25 +40,71 @@ fun DiaryScreen(
         )
     )
     val gameLogs by viewModel.gameLogs.collectAsState()
+    val currentFilter by viewModel.filter.collectAsState()
     var selectedLog by remember { mutableStateOf<GameLog?>(null) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
-    if (gameLogs.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("No games logged yet.", style = MaterialTheme.typography.bodyLarge)
-        }
-    } else {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(gameLogs) { log ->
-                GameLogItem(
-                    gameLog = log,
-                    onItemClick = { selectedLog = log },
-                    onPosterClick = { onPosterClick(log.gameId) }
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Filter Chips
+        ScrollableTabRow(
+            selectedTabIndex = if (currentFilter == null) 0 else GameStatus.values().indexOf(currentFilter) + 1,
+            edgePadding = 16.dp,
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.primary,
+            indicator = { tabPositions ->
+                // Custom indicator or default
+                TabRowDefaults.Indicator(
+                    Modifier.tabIndicatorOffset(tabPositions[if (currentFilter == null) 0 else GameStatus.values().indexOf(currentFilter) + 1])
                 )
+            },
+            divider = {}
+        ) {
+            // "All" Tab
+            Tab(
+                selected = currentFilter == null,
+                onClick = { viewModel.setFilter(null) },
+                text = { Text("All") }
+            )
+            
+            // Status Tabs
+            GameStatus.values().forEach { status ->
+                Tab(
+                    selected = currentFilter == status,
+                    onClick = { viewModel.setFilter(status) },
+                    text = { 
+                         val label = when(status) {
+                             GameStatus.PLAYED -> "Played"
+                             GameStatus.PLAYING -> "Playing"
+                             GameStatus.BACKLOGGED -> "Backlog"
+                             GameStatus.DROPPED -> "Dropped"
+                             GameStatus.ON_HOLD -> "On Hold"
+                         }
+                         Text(label) 
+                    }
+                )
+            }
+        }
+
+        if (gameLogs.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(
+                    text = if (currentFilter == null) "No games logged yet." else "No games in this category.",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(gameLogs) { log ->
+                    GameLogItem(
+                        gameLog = log,
+                        onItemClick = { selectedLog = log },
+                        onPosterClick = { onPosterClick(log.gameId) }
+                    )
+                }
             }
         }
     }

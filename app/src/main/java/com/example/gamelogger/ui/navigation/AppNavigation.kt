@@ -7,7 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.gamelogger.ui.features.backlog.BacklogScreen
+
 import com.example.gamelogger.ui.features.diary.DiaryScreen
 import com.example.gamelogger.ui.features.discover.DiscoverScreen
 import com.example.gamelogger.ui.features.search.SearchScreen
@@ -22,7 +22,7 @@ object AppDestinations {
     const val DISCOVER = "discover"
     const val SEARCH = "search"
     const val DIARY = "diary"
-    const val BACKLOG = "backlog"
+
 
     const val GAME_DETAILS = "gameDetails"
     const val GAME_ID_ARG = "gameID"
@@ -61,9 +61,7 @@ fun AppNavHost(
                 }
             )
         }
-        composable(AppDestinations.BACKLOG) {
-            BacklogScreen()
-        }
+
         composable(AppDestinations.SETTINGS) {
             SettingsScreen(
                 viewModel = settingsViewModel,

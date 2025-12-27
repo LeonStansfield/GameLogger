@@ -194,28 +194,6 @@ fun AppBottomBar(navController: NavHostController) {
                 }
             )
         }
-        // Backlog
-        IconButton(
-            onClick = {
-                navController.navigate(AppDestinations.BACKLOG) {
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        saveState = true
-                    }
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            },
-            modifier = Modifier.weight(1f)
-        ) {
-            Icon(
-                imageVector = Icons.Default.ClearAll,
-                contentDescription = "Backlog",
-                tint = if (currentDestination?.hierarchy?.any { it.route == AppDestinations.BACKLOG } == true) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                }
-            )
-        }
+
     }
 }
