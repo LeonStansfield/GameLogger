@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -165,6 +166,27 @@ fun AppBottomBar(navController: NavHostController) {
                 imageVector = Icons.Default.Search,
                 contentDescription = "Search",
                 tint = if (currentDestination?.hierarchy?.any { it.route == AppDestinations.SEARCH } == true) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
+            )
+        }
+        // Gallery
+        IconButton(
+            onClick = {
+                navController.navigate(AppDestinations.GALLERY) {
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
+            modifier = Modifier.weight(1f)
+        ) {
+            Icon(
+                imageVector = Icons.Default.PhotoLibrary, // Make sure you imported this
+                contentDescription = "Gallery",
+                tint = if (currentDestination?.hierarchy?.any { it.route == AppDestinations.GALLERY } == true) {
                     MaterialTheme.colorScheme.primary
                 } else {
                     MaterialTheme.colorScheme.onSurface
