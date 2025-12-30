@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -18,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import androidx.compose.material3.ScrollableTabRow
@@ -220,72 +222,113 @@ fun GameLogDetailsDialog(
     onDismiss: () -> Unit,
     onDelete: () -> Unit
 ) {
+    var showFullImage by remember { mutableStateOf(false) }
+
     Dialog(onDismissRequest = onDismiss) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            shape = MaterialTheme.shapes.medium
-        ) {
-            Column(
+        Box(contentAlignment = Alignment.Center) {
+            Card(
                 modifier = Modifier
-                    .padding(16.dp)
-                    .verticalScroll(rememberScrollState())
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                shape = MaterialTheme.shapes.medium
             ) {
-                Text(
-                    text = gameLog.title ?: "Game Details",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(16.dp))
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text(
+                        text = gameLog.title ?: "Game Details",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                DetailRow(label = "Status", value = gameLog.status.name)
-                
-                gameLog.playTime.takeIf { it > 0 }?.let {
-                    DetailRow(label = "Play Time", value = "$it hours")
-                }
-                
-                gameLog.userRating?.let {
-                    DetailRow(label = "Rating", value = "$it / 5.0")
-                }
-                
-                gameLog.locationName?.let {
-                    DetailRow(label = "Location", value = it)
-                }
+                    DetailRow(label = "Status", value = gameLog.status.name)
 
-                if (!gameLog.review.isNullOrBlank()) {
+                    gameLog.playTime.takeIf { it > 0 }?.let {
+                        DetailRow(label = "Play Time", value = "$it hours")
+                    }
+
+                    gameLog.userRating?.let {
+                        DetailRow(label = "Rating", value = "$it / 5.0")
+                    }
+
+                    gameLog.locationName?.let {
+                        DetailRow(label = "Location", value = it)
+                    }
+
+                    if (!gameLog.review.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Review:",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = gameLog.review,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+
+                    if (!gameLog.photoUri.isNullOrEmpty()) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(text = "Memory:", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Card(
+                            shape = MaterialTheme.shapes.small,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { showFullImage = true }
+                        ){
+                            AsyncImage(
+                                model = gameLog.photoUri,
+                                contentDescription = "Memory",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Review:",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold
+                        text = "Logged: ${formatRelativeTime(gameLog.lastStatusDate)}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Text(
-                        text = gameLog.review,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Logged on: ${formatRelativeTime(gameLog.lastStatusDate)}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
 
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        TextButton(onClick = onDelete) {
+                            Text("Delete", color = MaterialTheme.colorScheme.error)
+                        }
+                        Button(onClick = onDismiss) {
+                            Text("Close")
+                        }
+                    }
+                }
+            }
+            if (showFullImage && !gameLog.photoUri.isNullOrEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable { showFullImage = false },
+                    contentAlignment = Alignment.Center
                 ) {
-                    TextButton(onClick = onDelete) {
-                        Text("Delete", color = MaterialTheme.colorScheme.error)
-                    }
-                    Button(onClick = onDismiss) {
-                        Text("Close")
-                    }
+                    AsyncImage(
+                        model = gameLog.photoUri,
+                        contentDescription = "Memory",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit
+                    )
                 }
             }
         }

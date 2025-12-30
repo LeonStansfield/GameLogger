@@ -28,7 +28,8 @@ class LogGameViewModel(
         review: String? = null,
         latitude: Double? = null,
         longitude: Double? = null,
-        locationName: String? = null
+        locationName: String? = null,
+        photoUri: String? = null
     ) {
         // Fetch game details to get title and poster
         val details = try {
@@ -52,7 +53,8 @@ class LogGameViewModel(
             longitude = longitude,
             locationName = locationName,
             title = title,
-            posterUrl = posterUrl
+            posterUrl = posterUrl,
+            photoUri = photoUri
         )
         gameLogDao.insertOrUpdateGameLog(gameLog)
     }

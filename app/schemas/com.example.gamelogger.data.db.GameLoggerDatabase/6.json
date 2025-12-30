@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 6,
-    "identityHash": "0b2c34bd3b177f22b6250216854272ba",
+    "identityHash": "3d24921eb00d10fd06052ba6a5f55888",
     "entities": [
       {
         "tableName": "game_logs",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`gameId` TEXT NOT NULL, `status` TEXT NOT NULL, `playTime` INTEGER NOT NULL, `userRating` REAL, `review` TEXT, `lastStatusDate` INTEGER NOT NULL, `latitude` REAL, `longitude` REAL, `locationName` TEXT, `title` TEXT, `posterUrl` TEXT, PRIMARY KEY(`gameId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`gameId` TEXT NOT NULL, `status` TEXT NOT NULL, `playTime` INTEGER NOT NULL, `userRating` REAL, `review` TEXT, `lastStatusDate` INTEGER NOT NULL, `latitude` REAL, `longitude` REAL, `locationName` TEXT, `title` TEXT, `posterUrl` TEXT, `photoUri` TEXT, PRIMARY KEY(`gameId`))",
         "fields": [
           {
             "fieldPath": "gameId",
@@ -66,6 +66,11 @@
             "fieldPath": "posterUrl",
             "columnName": "posterUrl",
             "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "photoUri",
+            "columnName": "photoUri",
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -78,7 +83,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0b2c34bd3b177f22b6250216854272ba')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3d24921eb00d10fd06052ba6a5f55888')"
     ]
   }
 }

@@ -16,6 +16,7 @@ import com.example.gamelogger.ui.features.loggame.LogGameScreen
 import com.example.gamelogger.ui.features.review.ReviewScreen
 import com.example.gamelogger.ui.features.settings.SettingsScreen
 import com.example.gamelogger.ui.features.settings.SettingsViewModel
+import com.example.gamelogger.ui.features.camera.CameraScreen
 
 // Define navigation routes
 object AppDestinations {
@@ -35,6 +36,8 @@ object AppDestinations {
     val reviewRoute = "$REVIEW/{$GAME_ID_ARG}"
 
     const val SETTINGS = "settings"
+
+    const val CAMERA = "camera"
 }
 
 @Composable
@@ -102,7 +105,8 @@ fun AppNavHost(
                     onBackClick = { navController.popBackStack() },
                     onNavigateToReview = { id, _ ->
                         navController.navigate("${AppDestinations.REVIEW}/$id")
-                    }
+                    },
+                    navController = navController
                 )
             }
         }
@@ -124,6 +128,16 @@ fun AppNavHost(
                     onBackClick = { navController.popBackStack() }
                 )
             }
+        }
+        composable(AppDestinations.CAMERA) {
+            CameraScreen(
+                onPhotoTaken = { uri ->
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("photo_uri", uri)
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }

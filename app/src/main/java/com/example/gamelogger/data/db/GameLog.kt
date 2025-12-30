@@ -24,6 +24,7 @@ data class GameLog(
     val longitude: Double? = null,
     val locationName: String? = null,
     val title: String? = null,
-    val posterUrl: String? = null
+    val posterUrl: String? = null,
+    val photoUri: String? = null
 )
 

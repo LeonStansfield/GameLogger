@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -34,11 +35,15 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.example.gamelogger.data.db.GameLoggerDatabase
 import com.example.gamelogger.data.db.GameStatus
+import com.example.gamelogger.ui.navigation.AppDestinations
 import com.example.gamelogger.util.formatRelativeTime
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.launch
@@ -47,6 +52,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun LogGameScreen(
     gameId: String,
+    navController: NavHostController,
     onBackClick: () -> Unit,
     onNavigateToReview: (String, String?) -> Unit,
     viewModel: LogGameViewModel = viewModel(
@@ -63,12 +69,31 @@ fun LogGameScreen(
     var selectedLongitude by remember { mutableStateOf<Double?>(null) }
     var selectedLocationName by remember { mutableStateOf<String?>(null) }
 
+    var selectedPhotoUri by remember { mutableStateOf<String?>(null) }
+
     var showRatingDialog by remember { mutableStateOf(false) }
     var showLocationDialog by remember { mutableStateOf(false) }
     var showReviewDialog by remember { mutableStateOf(false) }
     var selectedReview by remember { mutableStateOf<String?>(null) }
 
     val coroutineScope = rememberCoroutineScope()
+
+    // Listen for result from CameraScreen
+    // Watches the "photo_uri" key in navigation backstack
+    val currentBackStackEntry = navController.currentBackStackEntry
+    val savedStateHandle = currentBackStackEntry?.savedStateHandle
+    val returnedPhotoUriState = savedStateHandle?.getLiveData<String>("photo_uri")?.observeAsState()
+
+    // Update local state when photo returns
+    LaunchedEffect(returnedPhotoUriState?.value) {
+        val uri = returnedPhotoUriState?.value
+
+        if (uri != null) {
+            selectedPhotoUri = uri
+            // Clear result so is not re-processed on rotation
+            savedStateHandle?.remove<String>("photo_uri")
+        }
+    }
 
     LaunchedEffect(gameLog) {
         if (selectedStatus == null) {
@@ -79,6 +104,7 @@ fun LogGameScreen(
                 selectedLongitude = it.longitude
                 selectedLocationName = it.locationName
                 selectedReview = it.review
+                selectedPhotoUri = it.photoUri
             }
         }
     }
@@ -220,6 +246,29 @@ fun LogGameScreen(
                 )
             }
 
+            // Camera Button
+            OutlinedButton(
+                onClick = {
+                    // Navigate to Camera Screen
+                    navController.navigate(AppDestinations.CAMERA)
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(if (selectedPhotoUri != null) "Retake Photo" else "Take Photo")
+            }
+
+            // Display Photo
+            if (selectedPhotoUri != null) {
+                AsyncImage(
+                    model = selectedPhotoUri,
+                    contentDescription = "Memory",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
             Spacer(modifier = Modifier.weight(1f))
 
             // Save button
@@ -234,7 +283,8 @@ fun LogGameScreen(
                                 review = selectedReview,
                                 latitude = selectedLatitude,
                                 longitude = selectedLongitude,
-                                locationName = selectedLocationName // Now correctly passing the name
+                                locationName = selectedLocationName,
+                                photoUri = selectedPhotoUri
                             )
                         }
                         onBackClick()

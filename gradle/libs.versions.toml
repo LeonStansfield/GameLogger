@@ -14,12 +14,14 @@ kotlinxSerialization = "1.6.3"
 navigationCompose = "2.7.7"
 room = "2.8.3"
 ksp = "2.2.20-2.0.4"
+runtimeLivedata = "1.10.0"
 secrets-gradle-plugin = "2.0.1"
 maps-compose = "6.4.0"
 play-services-maps = "19.0.0"
 uiTextGoogleFonts = "1.9.4"
 
 [libraries]
+androidx-compose-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "runtimeLivedata" }
 androidx-compose-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
