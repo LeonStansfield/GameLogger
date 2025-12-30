@@ -9,7 +9,7 @@ import androidx.room.AutoMigration
 
 @Database(
     entities = [GameLog::class],
-    version = 7,
+    version = 8,
     exportSchema = true,
     autoMigrations = [
         AutoMigration (from = 5, to = 6)

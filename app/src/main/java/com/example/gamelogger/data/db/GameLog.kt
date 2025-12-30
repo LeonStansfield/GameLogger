@@ -25,6 +25,9 @@ data class GameLog(
     val locationName: String? = null,
     val title: String? = null,
     val posterUrl: String? = null,
-    val photoUri: String? = null
+    val photoUri: String? = null,
+    val totalSecondsPlayed: Long = 0, // Aggregated time from timer
+    val sessionCount: Int = 0, // Number of times timer was stopped
+    val timerStartTime: Long? = null, // If not null, timer is running
 )
 
