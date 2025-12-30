@@ -17,6 +17,7 @@ import com.example.gamelogger.ui.features.review.ReviewScreen
 import com.example.gamelogger.ui.features.settings.SettingsScreen
 import com.example.gamelogger.ui.features.settings.SettingsViewModel
 import com.example.gamelogger.ui.features.camera.CameraScreen
+import com.example.gamelogger.ui.features.gallery.GalleryScreen
 
 // Define navigation routes
 object AppDestinations {
@@ -38,6 +39,8 @@ object AppDestinations {
     const val SETTINGS = "settings"
 
     const val CAMERA = "camera"
+
+    const val GALLERY = "gallery"
 }
 
 @Composable
@@ -138,6 +141,9 @@ fun AppNavHost(
                     navController.popBackStack()
                 }
             )
+        }
+        composable(AppDestinations.GALLERY) {
+            GalleryScreen()
         }
     }
 }

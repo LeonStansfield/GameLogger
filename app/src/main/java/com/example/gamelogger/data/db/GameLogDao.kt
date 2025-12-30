@@ -24,5 +24,8 @@ interface GameLogDao {
 
     @Query("DELETE FROM game_logs")
     suspend fun deleteAllGameLogs()
+
+    @Query("SELECT * FROM game_logs WHERE photoUri IS NOT NULL AND photoUri != ''")
+    fun getAllGamesWithPhotos(): Flow<List<GameLog>>
 }
 
