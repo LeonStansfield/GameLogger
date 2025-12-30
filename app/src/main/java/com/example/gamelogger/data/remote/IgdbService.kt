@@ -20,15 +20,18 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import java.util.Calendar
+import kotlin.math.log
 
 class IgdbService {
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
 
     private val httpClient = HttpClient(CIO) {
         install(ContentNegotiation) {
-            json(Json {
-                ignoreUnknownKeys = true
-                isLenient = true
-            })
+            // Use the reusable instance here
+            json(json)
         }
     }
 
@@ -79,7 +82,6 @@ class IgdbService {
         return try {
             httpClient.post("https://api.igdb.com/v4/games") {
                 headers {
-                    // This reference will now be resolved
                     append("Client-ID", BuildConfig.IGDB_CLIENT_ID)
                     append("Authorization", "Bearer ${token.accessToken}")
                 }
@@ -87,7 +89,7 @@ class IgdbService {
                 setBody(
                     "fields id, name, cover.image_id, first_release_date, total_rating, total_rating_count; " +
                             "where first_release_date > $twoYearsAgoTimestamp & total_rating_count > 25; " +
-                            "sort total_rating desc; " +
+                            "sort total_rating_count desc; " +
                             "limit 20;"
                 )
             }.body()
@@ -154,6 +156,43 @@ class IgdbService {
         } catch (e: Exception) {
             Log.e("IgdbService", "Error fetching game details for ID $gameId", e)
             null
+        }
+    }
+
+    // --- Random Game Function (Time Traveler Strategy) ---
+    suspend fun getRandomGame(): Game? {
+        val token = getAuthTokenIfNeeded()
+        if (token == null) {
+            Log.e("IgdbService", "Auth token is null, cannot fetch random game.")
+            return null
+        }
+
+        // 1. Pick a random timestamp from the last 10 years.
+        // This acts as a Random Seed
+        val currentTimestamp = System.currentTimeMillis() / 1000
+        val tenYearsInSeconds = 315_569_260L // Approx 10 years
+        val startTimestamp = currentTimestamp - tenYearsInSeconds
+        val randomDate = (startTimestamp..currentTimestamp).random()
+
+        return try {
+            httpClient.post("https://api.igdb.com/v4/games") {
+                headers {
+                    append("Client-ID", BuildConfig.IGDB_CLIENT_ID)
+                    append("Authorization", "Bearer ${token.accessToken}")
+                }
+                contentType(ContentType.Application.Json)
+                setBody(
+                    "fields id, name, cover.image_id, total_rating, total_rating_count, first_release_date; " +
+                            // Find the first game released BEFORE random date.
+                            "where first_release_date < $randomDate & total_rating_count > 5; " +
+                            "sort first_release_date desc; " +
+                            "limit 1;"
+                )
+            }.body<List<Game>>().firstOrNull()
+
+        } catch (e: Exception) {
+            Log.e("IgdbService", "Error fetching random game, falling back to top20trending game.", e)
+            getTop20TrendingGames().randomOrNull()
         }
     }
 }
