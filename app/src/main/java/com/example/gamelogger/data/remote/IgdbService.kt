@@ -116,7 +116,7 @@ class IgdbService {
                 setBody(
                     // Using the "search" keyword and limiting to 20 results
                     "search \"$query\"; " +
-                            "fields id name, cover.image_id; " +
+                            "fields id, name, cover.image_id; " +
                             "limit 20;"
                 )
             }.body()
