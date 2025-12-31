@@ -106,6 +106,8 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation(libs.androidx.compose.ui.text.google.fonts)
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

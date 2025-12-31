@@ -11,9 +11,9 @@ import com.example.gamelogger.data.remote.IgdbService // Updated import
 import kotlinx.coroutines.launch
 
 // Renamed from GameLoggerViewModel
-class DiscoverViewModel : ViewModel() {
-
-    private val igdbService = IgdbService()
+class DiscoverViewModel(
+    private val igdbService: IgdbService = IgdbService()
+) : ViewModel() {
 
     var games by mutableStateOf<List<Game>>(emptyList())
         private set

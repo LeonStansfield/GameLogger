@@ -22,7 +22,7 @@ import kotlinx.serialization.json.Json
 import java.util.Calendar
 import kotlin.math.log
 
-class IgdbService {
+open class IgdbService {
     private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
@@ -68,7 +68,7 @@ class IgdbService {
 
 
     // --- Discover Function ---
-    suspend fun getTop20TrendingGames(): List<Game> {
+    open suspend fun getTop20TrendingGames(): List<Game> {
         val token = getAuthTokenIfNeeded()
         if (token == null) {
             Log.e("IgdbService", "Auth token is null, cannot fetch trending games.")
@@ -100,7 +100,7 @@ class IgdbService {
     }
 
     // --- Search Function ---
-    suspend fun searchGames(query: String): List<Game> {
+    open suspend fun searchGames(query: String): List<Game> {
         val token = getAuthTokenIfNeeded()
         if (token == null) {
             Log.e("IgdbService", "Auth token is null, cannot search games.")
@@ -127,7 +127,7 @@ class IgdbService {
             emptyList()
         }
     }
-    suspend fun getGameDetails(gameId: Int): Game? {
+    open suspend fun getGameDetails(gameId: Int): Game? {
         val token = getAuthTokenIfNeeded()
         if (token == null) {
             Log.e("IgdbService", "Auth token is null, cannot fetch game details.")
@@ -160,7 +160,7 @@ class IgdbService {
     }
 
     // --- Random Game Function (Time Traveler Strategy) ---
-    suspend fun getRandomGame(): Game? {
+    open suspend fun getRandomGame(): Game? {
         val token = getAuthTokenIfNeeded()
         if (token == null) {
             Log.e("IgdbService", "Auth token is null, cannot fetch random game.")
