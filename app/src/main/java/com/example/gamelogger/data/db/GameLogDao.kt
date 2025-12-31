@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -27,5 +28,14 @@ interface GameLogDao {
 
     @Query("SELECT * FROM game_logs WHERE photoUri IS NOT NULL AND photoUri != ''")
     fun getAllGamesWithPhotos(): Flow<List<GameLog>>
+
+    @Query("SELECT * FROM game_logs WHERE gameId = :gameId")
+    suspend fun getGameLogById(gameId: String): GameLog?
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertLog(gameLog: GameLog)
+
+    @Update
+    suspend fun updateLog(gameLog: GameLog)
 }
 

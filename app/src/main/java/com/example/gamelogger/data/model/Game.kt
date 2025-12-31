@@ -2,6 +2,9 @@ package com.example.gamelogger.data.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Serializable
 data class Game(
@@ -31,12 +34,13 @@ data class Genre(
     val name: String
 )
 
-// You can also add a helper to format the date
 fun Game.getReleaseDateString(): String? {
-    // This is a basic example; you'd use platform-specific date formatters
-    return firstReleaseDate?.let {
-        // Placeholder for date conversion
-        "Released: $it" // e.g., "Released: 1998-11-19"
+    return firstReleaseDate?.let { timestamp ->
+        val date = Date(timestamp * 1000)
+
+        val formatter = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+
+        "Released: ${formatter.format(date)}"
     }
 }
 

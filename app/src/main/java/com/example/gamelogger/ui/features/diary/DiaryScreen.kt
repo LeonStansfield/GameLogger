@@ -246,8 +246,28 @@ fun GameLogDetailsDialog(
 
                     DetailRow(label = "Status", value = gameLog.status.name)
 
-                    gameLog.playTime.takeIf { it > 0 }?.let {
-                        DetailRow(label = "Play Time", value = "$it hours")
+                    val totalSeconds = gameLog.totalSecondsPlayed
+
+                    val displayTime = if (totalSeconds > 0) {
+                        if (totalSeconds < 3600) {
+                            // Less than 1 hour: Show Minutes
+                            val minutes = totalSeconds / 60
+                            "$minutes mins (${gameLog.sessionCount} sessions)"
+                        } else {
+                            // 1 hour or more: Show Decimal Hours
+                            val totalHours = totalSeconds / 3600f
+                            String.format("%.1f hours (%d sessions)", totalHours, gameLog.sessionCount)
+                        }
+                    } else if (gameLog.playTime > 0) {
+                        // Fallback for legacy manual entries
+                        "${gameLog.playTime} hours (Manual)"
+                    } else {
+                        null
+                    }
+
+                    // Display the row if we have a valid time string
+                    displayTime?.let {
+                        DetailRow(label = "Play Time", value = it)
                     }
 
                     gameLog.userRating?.let {
