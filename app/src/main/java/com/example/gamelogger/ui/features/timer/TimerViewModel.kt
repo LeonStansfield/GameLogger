@@ -55,8 +55,8 @@ class TimerViewModel(
         }
     }
 
-    fun toggleTimer(gameDetails: Game?) {
-        viewModelScope.launch {
+    fun toggleTimer(gameDetails: Game?): Job {
+        return viewModelScope.launch {
             val existingLog = gameLogDao.getGameLogById(gameId)
             val currentTime = System.currentTimeMillis()
 
@@ -108,8 +108,8 @@ class TimerViewModel(
             }
         }
     }
-    fun updateManualPlaytime(gameDetails: Game?, hours: Int, minutes: Int) {
-        viewModelScope.launch {
+    fun updateManualPlaytime(gameDetails: Game?, hours: Int, minutes: Int): Job {
+        return viewModelScope.launch {
             // Calculate the target total seconds from user input
             val targetTotalSeconds = (hours * 3600L) + (minutes * 60L)
 

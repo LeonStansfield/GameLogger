@@ -8,6 +8,7 @@ import com.example.gamelogger.data.db.GameStatus
 import com.example.gamelogger.data.remote.IgdbService
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -59,9 +60,10 @@ class LogGameViewModel(
         gameLogDao.insertOrUpdateGameLog(gameLog)
     }
 
-    fun updateReview(review: String) {
-        viewModelScope.launch {
-            val currentLog = gameLog.value
+    fun updateReview(review: String): kotlinx.coroutines.Job {
+        return viewModelScope.launch {
+            // Query database directly instead of relying on StateFlow value
+            val currentLog = gameLogDao.getGameLog(gameId).first()
             if (currentLog != null) {
                 // Preserve the lastStatusDate when only updating review
                 val updatedLog = currentLog.copy(review = review)
