@@ -12,9 +12,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class SearchViewModel : ViewModel() {
-
-    private val igdbService = IgdbService()
+class SearchViewModel(
+    private val igdbService: IgdbService = IgdbService()
+) : ViewModel() {
 
     var searchQuery by mutableStateOf("")
         private set
