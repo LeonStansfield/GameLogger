@@ -8,15 +8,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -75,6 +79,9 @@ fun LogGameScreen(
     var showLocationDialog by remember { mutableStateOf(false) }
     var showReviewDialog by remember { mutableStateOf(false) }
     var selectedReview by remember { mutableStateOf<String?>(null) }
+
+    var isSaving by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -276,7 +283,8 @@ fun LogGameScreen(
                 onClick = {
                     coroutineScope.launch {
                         selectedStatus?.let { status ->
-                            viewModel.saveGameLog(
+                            isSaving = true
+                            val success = viewModel.saveGameLog(
                                 status = status,
                                 playTime = gameLog?.playTime ?: 0,
                                 userRating = selectedRating,
@@ -286,16 +294,32 @@ fun LogGameScreen(
                                 locationName = selectedLocationName,
                                 photoUri = selectedPhotoUri
                             )
+                            isSaving = false
+                            if (success) {
+                                onBackClick()
+                            } else {
+                                snackbarHostState.showSnackbar("Failed to save. Please try again.")
+                            }
                         }
-                        onBackClick()
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = selectedStatus != null
+                enabled = selectedStatus != null && !isSaving
             ) {
-                Text("Save")
+                if (isSaving) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("Save")
+                }
             }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState
+        )
 
         // Rating Dialog
         if (showRatingDialog) {

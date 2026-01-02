@@ -25,26 +25,55 @@ class SearchViewModel(
     var isLoading by mutableStateOf(false)
         private set
 
+    var errorMessage by mutableStateOf<String?>(null)
+        private set
+
     private var searchJob: Job? = null
 
     fun onSearchQueryChanged(query: String) {
         searchQuery = query
-        searchJob?.cancel() // Cancel previous job
+        searchJob?.cancel()
+        errorMessage = null
+
         searchJob = viewModelScope.launch {
-            if (query.length < 3) {
-                games = emptyList() // Clear results if query is too short
+            // Sanitize input - remove potentially dangerous characters
+            val sanitizedQuery = query.trim()
+                .replace("\"", "")
+                .replace(";", "")
+                .replace("\\", "")
+                .replace("'", "")
+                .trim() // Trim again after removing characters
+                .take(100) // Limit query length
+
+            // Check length AFTER sanitization to prevent empty/short queries
+            if (sanitizedQuery.length < 3) {
+                games = emptyList()
+                if (query.isNotBlank() && sanitizedQuery.isEmpty()) {
+                    // User entered only special characters
+                    errorMessage = "Please enter valid search characters."
+                }
                 return@launch
             }
 
             isLoading = true
-            delay(500) // Debounce: wait 500ms after user stops typing
+            delay(500) // Debounce
             try {
-                games = igdbService.searchGames(query)
+                games = igdbService.searchGames(sanitizedQuery)
+                if (games.isEmpty() && sanitizedQuery.isNotEmpty()) {
+                    // Not an error, just no results
+                    errorMessage = null
+                }
             } catch (e: Exception) {
                 Log.e("SearchViewModel", "Exception searching games", e)
+                games = emptyList()
+                errorMessage = "Search failed. Please check your connection."
             } finally {
                 isLoading = false
             }
         }
+    }
+
+    fun clearError() {
+        errorMessage = null
     }
 }

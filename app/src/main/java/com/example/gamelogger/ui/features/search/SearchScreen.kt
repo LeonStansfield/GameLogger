@@ -11,9 +11,14 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -29,22 +34,35 @@ fun SearchScreen(
     navController: NavHostController
 ) {
     val viewModel: SearchViewModel = viewModel()
+    val snackbarHostState = remember { SnackbarHostState() }
 
+    // Show error in snackbar
+    LaunchedEffect(viewModel.errorMessage) {
+        viewModel.errorMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.clearError()
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            // Search Bar
             OutlinedTextField(
                 value = viewModel.searchQuery,
                 onValueChange = { viewModel.onSearchQueryChanged(it) },
                 label = { Text("Search for a game...") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                supportingText = {
+                    if (viewModel.searchQuery.isNotEmpty() && viewModel.searchQuery.length < 3) {
+                        Text("Enter at least 3 characters")
+                    }
+                }
             )
 
-            // Content Area
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -56,6 +74,7 @@ fun SearchScreen(
                 } else {
                     SearchGameGrid(
                         games = viewModel.games,
+                        query = viewModel.searchQuery,
                         onGameClick = { game ->
                             navController.navigate(
                                 "${AppDestinations.GAME_DETAILS}/${game.id}"
@@ -65,17 +84,30 @@ fun SearchScreen(
                 }
             }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
+}
 
 @Composable
 private fun SearchGameGrid(
     games: List<Game>,
+    query: String,
     onGameClick: (Game) -> Unit
 ) {
     if (games.isEmpty()) {
+        val message = when {
+            query.isEmpty() -> "Search for games to see results."
+            query.length < 3 -> "Keep typing to search..."
+            else -> "No games found for \"$query\".\nTry a different search term."
+        }
         Text(
-            text = "Search for games to see results.",
-            textAlign = TextAlign.Center
+            text = message,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     } else {
         LazyVerticalGrid(

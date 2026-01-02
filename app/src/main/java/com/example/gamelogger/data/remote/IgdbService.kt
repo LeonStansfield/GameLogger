@@ -20,7 +20,6 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import java.util.Calendar
-import kotlin.math.log
 
 open class IgdbService {
     private val json = Json {
@@ -107,6 +106,21 @@ open class IgdbService {
             return emptyList()
         }
 
+        // Defensive sanitization - second layer of protection
+        val sanitizedQuery = query.trim()
+            .replace("\"", "")
+            .replace(";", "")
+            .replace("\\", "")
+            .replace("'", "")
+            .trim()
+            .take(100)
+
+        // Prevent empty or too short queries from hitting the API
+        if (sanitizedQuery.length < 2) {
+            Log.w("IgdbService", "Query too short after sanitization: '$query' -> '$sanitizedQuery'")
+            return emptyList()
+        }
+
         return try {
             httpClient.post("https://api.igdb.com/v4/games") {
                 headers {
@@ -117,7 +131,7 @@ open class IgdbService {
                 contentType(ContentType.Application.Json)
                 setBody(
                     // Using the "search" keyword and limiting to 20 results
-                    "search \"$query\"; " +
+                    "search \"$sanitizedQuery\"; " +
                             "fields id, name, cover.image_id; " +
                             "limit 20;"
                 )

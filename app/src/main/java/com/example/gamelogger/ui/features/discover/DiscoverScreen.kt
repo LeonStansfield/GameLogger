@@ -13,35 +13,46 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel // Import viewmodel creator
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gamelogger.data.model.Game
 import com.example.gamelogger.ui.composables.GameCard
 import com.example.gamelogger.ui.navigation.AppDestinations
 import androidx.navigation.NavHostController
 
-// Renamed from GameLoggerApp to DiscoverScreen
-// Removed the Scaffold, TopAppBar, and BottomAppBar
 @Composable
 fun DiscoverScreen(
     navController: NavHostController
 ) {
-    // Get the ViewModel for this screen
     val viewModel: DiscoverViewModel = viewModel()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    // Watch for changes in viewModel.randomGame.
-    // If it becomes non-null, navigate to details and reset the state.
+    // Show error in snackbar
+    LaunchedEffect(viewModel.errorMessage) {
+        viewModel.errorMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.clearError()
+        }
+    }
+
+    // Navigate to random game when available
     LaunchedEffect(viewModel.randomGame) {
         viewModel.randomGame?.let { game ->
             navController.navigate("${AppDestinations.GAME_DETAILS}/${game.id}")
@@ -59,22 +70,26 @@ fun DiscoverScreen(
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
-                // Click triggers the fetch in ViewModel
                 RandomGameButton(
                     onClick = { viewModel.fetchRandomGame() }
                 )
 
-                // Existing Grid
                 GameGrid(
                     games = viewModel.games,
                     onGameClick = { game ->
                         navController.navigate(
                             "${AppDestinations.GAME_DETAILS}/${game.id}"
                         )
-                    }
+                    },
+                    onRetry = { viewModel.fetchTop20TrendingGames() }
                 )
             }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }
 
@@ -95,13 +110,36 @@ fun RandomGameButton(onClick: () -> Unit) {
 @Composable
 private fun GameGrid(
     games: List<Game>,
-    onGameClick: (Game) -> Unit
+    onGameClick: (Game) -> Unit,
+    onRetry: () -> Unit
 ) {
     if (games.isEmpty()) {
-        Text(
-            text = "No games found.\nCheck Logcat for errors and try refreshing.",
-            textAlign = TextAlign.Center
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "No games available",
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Check your internet connection and try again.",
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedButton(onClick = onRetry) {
+                Icon(Icons.Filled.Refresh, contentDescription = null)
+                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                Text("Retry")
+            }
+        }
     } else {
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),

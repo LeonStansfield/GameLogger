@@ -21,6 +21,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -79,18 +80,18 @@ fun GameDetailsScreen(
     var gameDetails by remember { mutableStateOf<Game?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var retryTrigger by remember { mutableStateOf(0) }
 
-    LaunchedEffect(gameId) {
+    LaunchedEffect(gameId, retryTrigger) {
         isLoading = true
         errorMessage = null
         try {
-            // Call ViewModel with the Int ID
             gameDetails = viewModel.fetchGameDetails(gameId)
             if (gameDetails == null) {
                 errorMessage = "Game not found."
             }
         } catch (e: Exception) {
-            errorMessage = "Failed to load game: ${e.message}"
+            errorMessage = "Failed to load game. Please check your connection."
         } finally {
             isLoading = false
         }
@@ -99,7 +100,7 @@ fun GameDetailsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(gameDetails?.name ?: "Loading...") },
+                title = { Text(gameDetails?.name ?: if (isLoading) "Loading..." else "Error") },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
@@ -132,14 +133,22 @@ fun GameDetailsScreen(
             if (isLoading) {
                 CircularProgressIndicator()
             } else if (errorMessage != null) {
-                Text(
-                    text = errorMessage ?: "",
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(16.dp),
-                    textAlign = TextAlign.Center
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.padding(32.dp)
+                ) {
+                    Text(
+                        text = errorMessage ?: "",
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    OutlinedButton(onClick = { retryTrigger++ }) {
+                        Text("Retry")
+                    }
+                }
             } else if (gameDetails != null) {
-                // Use the data-model-specific composable
                 GameDetailsContent(
                     game = gameDetails!!,
                     timerViewModel = timerViewModel
