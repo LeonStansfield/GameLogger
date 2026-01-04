@@ -2,8 +2,15 @@ package com.example.gamelogger.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val LGM_Dark_Blue = Color(0xFF2F4673)
-val LGM_Grey_Blue = Color(0xFF64758C)
-val LGM_Light_Grey = Color(0xFF949BA6)
-val LGM_Off_White = Color(0xFFD9D9D9)
-val LGM_Near_Black = Color(0xFF0D0D0D)
+// Base colors
+val LGM_Black = Color(0xFF000000)
+val LGM_White = Color(0xFFFFFFFF)
+
+// Purple palette (Dark mode primary, Light mode primary)
+val Purple_Light = Color(0xFFBB86FC)  // Dark mode primary
+val Purple_Medium = Color(0xFF6200EE) // Light mode primary
+val Purple_Dark = Color(0xFF3700B3)   // Dark mode secondary
+
+// Teal palette (Light mode secondary/tertiary)
+val Teal_Light = Color(0xFF03DAC5)    // Light mode secondary
+val Teal_Dark = Color(0xFF018786)     // Light mode tertiary
