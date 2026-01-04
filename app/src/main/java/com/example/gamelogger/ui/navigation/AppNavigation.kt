@@ -64,6 +64,9 @@ fun AppNavHost(
             DiaryScreen(
                 onPosterClick = { gameId ->
                     navController.navigate("${AppDestinations.GAME_DETAILS}/$gameId")
+                },
+                onEditClick = { gameId ->
+                    navController.navigate("${AppDestinations.LOG_GAME}/$gameId")
                 }
             )
         }

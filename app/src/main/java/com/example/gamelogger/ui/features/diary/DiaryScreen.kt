@@ -33,7 +33,8 @@ import com.example.gamelogger.util.formatRelativeTime
 
 @Composable
 fun DiaryScreen(
-    onPosterClick: (String) -> Unit
+    onPosterClick: (String) -> Unit,
+    onEditClick: (String) -> Unit
 ) {
     val context = LocalContext.current
     val viewModel: DiaryViewModel = viewModel(
@@ -138,7 +139,11 @@ fun DiaryScreen(
             GameLogDetailsDialog(
                 gameLog = selectedLog!!,
                 onDismiss = { selectedLog = null },
-                onDelete = { showDeleteConfirm = true }
+                onDelete = { showDeleteConfirm = true },
+                onEdit = {
+                     onEditClick(selectedLog!!.gameId)
+                     selectedLog = null // Dismiss dialog when navigating to edit
+                }
             )
         }
     }
@@ -220,7 +225,8 @@ fun GameLogItem(
 fun GameLogDetailsDialog(
     gameLog: GameLog,
     onDismiss: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onEdit: () -> Unit
 ) {
     var showFullImage by remember { mutableStateOf(false) }
 
@@ -309,7 +315,7 @@ fun GameLogDetailsDialog(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(200.dp),
-                                contentScale = ContentScale.Crop
+                                    contentScale = ContentScale.Crop
                             )
                         }
                     }
@@ -330,8 +336,14 @@ fun GameLogDetailsDialog(
                         TextButton(onClick = onDelete) {
                             Text("Delete", color = MaterialTheme.colorScheme.error)
                         }
-                        Button(onClick = onDismiss) {
-                            Text("Close")
+                        
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                             OutlinedButton(onClick = onEdit) {
+                                Text("Edit")
+                            }
+                            Button(onClick = onDismiss) {
+                                Text("Close")
+                            }
                         }
                     }
                 }

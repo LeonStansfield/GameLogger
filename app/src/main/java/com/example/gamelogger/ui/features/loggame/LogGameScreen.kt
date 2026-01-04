@@ -1,6 +1,7 @@
 package com.example.gamelogger.ui.features.loggame
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -135,184 +136,193 @@ fun LogGameScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Log game ID: $gameId",
-                fontSize = 18.sp
-            )
-
-            // Display last status update date if available
-            gameLog?.let {
-                Text(
-                    text = "Last updated: ${formatRelativeTime(it.lastStatusDate)}",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(text = "Status", fontSize = 16.sp)
-
-            // Status buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                StatusButton(
-                    text = "Played",
-                    isSelected = selectedStatus == GameStatus.PLAYED,
-                    onClick = { selectedStatus = GameStatus.PLAYED },
-                    modifier = Modifier.weight(1f)
-                )
-                StatusButton(
-                    text = "Playing",
-                    isSelected = selectedStatus == GameStatus.PLAYING,
-                    onClick = { selectedStatus = GameStatus.PLAYING },
-                    modifier = Modifier.weight(1f)
-                )
-                StatusButton(
-                    text = "Backlog",
-                    isSelected = selectedStatus == GameStatus.BACKLOGGED,
-                    onClick = { selectedStatus = GameStatus.BACKLOGGED },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                StatusButton(
-                    text = "Dropped",
-                    isSelected = selectedStatus == GameStatus.DROPPED,
-                    onClick = { selectedStatus = GameStatus.DROPPED },
-                    modifier = Modifier.weight(1f)
-                )
-                StatusButton(
-                    text = "On Hold",
-                    isSelected = selectedStatus == GameStatus.ON_HOLD,
-                    onClick = { selectedStatus = GameStatus.ON_HOLD },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Rating button
-            OutlinedButton(
-                onClick = { showRatingDialog = true },
-                modifier = Modifier.fillMaxWidth()
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    if (selectedRating != null) {
-                        "Rating: $selectedRating ★"
-                    } else {
-                        "Add Rating"
-                    }
+                    text = "Log game ID: $gameId",
+                    fontSize = 18.sp
                 )
+
+                // Display last status update date if available
+                gameLog?.let {
+                    Text(
+                        text = "Last updated: ${formatRelativeTime(it.lastStatusDate)}",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(text = "Status", fontSize = 16.sp)
+
+                // Status buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    StatusButton(
+                        text = "Played",
+                        isSelected = selectedStatus == GameStatus.PLAYED,
+                        onClick = { selectedStatus = GameStatus.PLAYED },
+                        modifier = Modifier.weight(1f)
+                    )
+                    StatusButton(
+                        text = "Playing",
+                        isSelected = selectedStatus == GameStatus.PLAYING,
+                        onClick = { selectedStatus = GameStatus.PLAYING },
+                        modifier = Modifier.weight(1f)
+                    )
+                    StatusButton(
+                        text = "Backlog",
+                        isSelected = selectedStatus == GameStatus.BACKLOGGED,
+                        onClick = { selectedStatus = GameStatus.BACKLOGGED },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    StatusButton(
+                        text = "Dropped",
+                        isSelected = selectedStatus == GameStatus.DROPPED,
+                        onClick = { selectedStatus = GameStatus.DROPPED },
+                        modifier = Modifier.weight(1f)
+                    )
+                    StatusButton(
+                        text = "On Hold",
+                        isSelected = selectedStatus == GameStatus.ON_HOLD,
+                        onClick = { selectedStatus = GameStatus.ON_HOLD },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Rating button
+                OutlinedButton(
+                    onClick = { showRatingDialog = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        if (selectedRating != null) {
+                            "Rating: $selectedRating ★"
+                        } else {
+                            "Add Rating"
+                        }
+                    )
+                }
+
+                // Review button (Dialog)
+                OutlinedButton(
+                    onClick = { showReviewDialog = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        if (!selectedReview.isNullOrBlank()) {
+                            "Edit Review"
+                        } else {
+                            "Add Review"
+                        }
+                    )
+                }
+                if (!selectedReview.isNullOrBlank()) {
+                    Text(
+                        text = selectedReview!!,
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                
+                // Location Button
+                OutlinedButton(
+                    onClick = { showLocationDialog = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        if (!selectedLocationName.isNullOrBlank()) {
+                            "Location: $selectedLocationName"
+                        } else if (selectedLatitude != null && selectedLongitude != null) {
+                            "Location Selected"
+                        } else {
+                            "Add Location"
+                        }
+                    )
+                }
+
+                // Camera Button
+                OutlinedButton(
+                    onClick = {
+                        // Navigate to Camera Screen
+                        navController.navigate(AppDestinations.CAMERA)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(if (selectedPhotoUri != null) "Retake Photo" else "Take Photo")
+                }
+
+                // Display Photo
+                if (selectedPhotoUri != null) {
+                    AsyncImage(
+                        model = selectedPhotoUri,
+                        contentDescription = "Memory",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                }
             }
 
-            // Review button (Dialog)
-            OutlinedButton(
-                onClick = { showReviewDialog = true },
-                modifier = Modifier.fillMaxWidth()
+            // Save button fixed at bottom
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             ) {
-                Text(
-                    if (!selectedReview.isNullOrBlank()) {
-                        "Edit Review"
-                    } else {
-                        "Add Review"
-                    }
-                )
-            }
-            if (!selectedReview.isNullOrBlank()) {
-                Text(
-                    text = selectedReview!!,
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            
-            // Location Button
-            OutlinedButton(
-                onClick = { showLocationDialog = true },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    if (!selectedLocationName.isNullOrBlank()) {
-                        "Location: $selectedLocationName"
-                    } else if (selectedLatitude != null && selectedLongitude != null) {
-                        "Location Selected"
-                    } else {
-                        "Add Location"
-                    }
-                )
-            }
-
-            // Camera Button
-            OutlinedButton(
-                onClick = {
-                    // Navigate to Camera Screen
-                    navController.navigate(AppDestinations.CAMERA)
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(if (selectedPhotoUri != null) "Retake Photo" else "Take Photo")
-            }
-
-            // Display Photo
-            if (selectedPhotoUri != null) {
-                AsyncImage(
-                    model = selectedPhotoUri,
-                    contentDescription = "Memory",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    contentScale = ContentScale.Crop
-                )
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Save button
-            Button(
-                onClick = {
-                    coroutineScope.launch {
-                        selectedStatus?.let { status ->
-                            isSaving = true
-                            val success = viewModel.saveGameLog(
-                                status = status,
-                                playTime = gameLog?.playTime ?: 0,
-                                userRating = selectedRating,
-                                review = selectedReview,
-                                latitude = selectedLatitude,
-                                longitude = selectedLongitude,
-                                locationName = selectedLocationName,
-                                photoUri = selectedPhotoUri
-                            )
-                            isSaving = false
-                            if (success) {
-                                onBackClick()
-                            } else {
-                                snackbarHostState.showSnackbar("Failed to save. Please try again.")
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            selectedStatus?.let { status ->
+                                isSaving = true
+                                val success = viewModel.saveGameLog(
+                                    status = status,
+                                    playTime = gameLog?.playTime ?: 0,
+                                    userRating = selectedRating,
+                                    review = selectedReview,
+                                    latitude = selectedLatitude,
+                                    longitude = selectedLongitude,
+                                    locationName = selectedLocationName,
+                                    photoUri = selectedPhotoUri
+                                )
+                                isSaving = false
+                                if (success) {
+                                    onBackClick()
+                                } else {
+                                    snackbarHostState.showSnackbar("Failed to save. Please try again.")
+                                }
                             }
                         }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = selectedStatus != null && !isSaving
+                ) {
+                    if (isSaving) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("Save")
                     }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = selectedStatus != null && !isSaving
-            ) {
-                if (isSaving) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text("Save")
                 }
             }
         }
