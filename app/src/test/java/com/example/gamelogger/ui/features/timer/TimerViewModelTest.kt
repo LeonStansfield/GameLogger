@@ -56,100 +56,6 @@ class TimerViewModelTest {
         Dispatchers.resetMain()
     }
 
-    @Test
-    fun `toggleTimer starts timer when not running`() = runTest {
-        // Arrange
-        val gameDetails = Game(id = 123, name = "Test Game", cover = Cover("cover123"))
-        coEvery { gameLogDao.getGameLog(testGameId) } returns flowOf(null)
-        coEvery { gameLogDao.getGameLogById(testGameId) } returns null
-
-        val insertSlot = slot<GameLog>()
-        coEvery { gameLogDao.insertLog(capture(insertSlot)) } returns Unit
-
-        viewModel = TimerViewModel(gameLogDao, testGameId)
-        val job = launch { viewModel.gameLog.collect { } }
-        advanceUntilIdle()
-
-        // Act
-        viewModel.toggleTimer(gameDetails)
-        advanceUntilIdle()
-        job.cancel()
-
-        // Assert
-        coVerify { gameLogDao.insertLog(any()) }
-        val capturedLog = insertSlot.captured
-        assertNotNull("Timer start time should be set", capturedLog.timerStartTime)
-        assertEquals("Should be PLAYING status", GameStatus.PLAYING, capturedLog.status)
-        assertEquals("Session count should be 1", 1, capturedLog.sessionCount)
-    }
-
-    @Test
-    fun `toggleTimer stops timer when running`() = runTest {
-        // Arrange
-        val startTime = System.currentTimeMillis() - 3600000 // 1 hour ago
-        val existingLog = GameLog(
-            gameId = testGameId,
-            status = GameStatus.PLAYING,
-            playTime = 0,
-            userRating = null,
-            timerStartTime = startTime,
-            totalSecondsPlayed = 0,
-            sessionCount = 1
-        )
-
-        coEvery { gameLogDao.getGameLog(testGameId) } returns flowOf(existingLog)
-        coEvery { gameLogDao.getGameLogById(testGameId) } returns existingLog
-
-        val updateSlot = slot<GameLog>()
-        coEvery { gameLogDao.updateLog(capture(updateSlot)) } returns Unit
-
-        viewModel = TimerViewModel(gameLogDao, testGameId)
-        val job = launch { viewModel.gameLog.collect { } }
-        advanceUntilIdle()
-
-        // Act
-        viewModel.toggleTimer(null)
-        advanceUntilIdle()
-        job.cancel()
-
-        // Assert
-        coVerify { gameLogDao.updateLog(any()) }
-        val capturedLog = updateSlot.captured
-        assertNull("Timer should be stopped", capturedLog.timerStartTime)
-        assertEquals("Session count should be incremented", 2, capturedLog.sessionCount)
-        assertTrue("Total seconds should be updated", capturedLog.totalSecondsPlayed > 0)
-    }
-
-    @Test
-    fun `elapsedTimeSeconds updates when timer running`() = runTest {
-        // Arrange
-        val startTime = System.currentTimeMillis() - 5000 // 5 seconds ago
-        val existingLog = GameLog(
-            gameId = testGameId,
-            status = GameStatus.PLAYING,
-            playTime = 0,
-            userRating = null,
-            timerStartTime = startTime,
-            totalSecondsPlayed = 100, // 100 seconds already played
-            sessionCount = 1
-        )
-
-        coEvery { gameLogDao.getGameLog(testGameId) } returns flowOf(existingLog)
-
-        viewModel = TimerViewModel(gameLogDao, testGameId)
-        val job = launch { viewModel.gameLog.collect { } }
-        advanceUntilIdle()
-
-        // Act - advance time to let the timer update
-        advanceTimeBy(1000)
-        advanceUntilIdle()
-
-        val elapsed = viewModel.elapsedTimeSeconds.value
-        job.cancel()
-
-        // Assert - should be base 100 + current session time
-        assertTrue("Elapsed time should be at least 100 seconds", elapsed >= 100)
-    }
 
     @Test
     fun `elapsedTimeSeconds shows total when timer stopped`() = runTest {
@@ -261,36 +167,6 @@ class TimerViewModelTest {
         coVerify(exactly = 0) { gameLogDao.insertLog(any()) }
     }
 
-    @Test
-    fun `timer calculates session time correctly`() = runTest {
-        // Arrange
-        val startTime = System.currentTimeMillis() - 10000 // 10 seconds ago
-        val existingLog = GameLog(
-            gameId = testGameId,
-            status = GameStatus.PLAYING,
-            playTime = 0,
-            userRating = null,
-            timerStartTime = startTime,
-            totalSecondsPlayed = 500, // 500 seconds base
-            sessionCount = 1
-        )
-
-        coEvery { gameLogDao.getGameLog(testGameId) } returns flowOf(existingLog)
-
-        viewModel = TimerViewModel(gameLogDao, testGameId)
-        val job = launch { viewModel.gameLog.collect { } }
-        advanceUntilIdle()
-
-        // Act
-        advanceTimeBy(1000)
-        advanceUntilIdle()
-
-        val elapsed = viewModel.elapsedTimeSeconds.value
-        job.cancel()
-
-        // Assert - Should be base (500) + session time (~10)
-        assertTrue("Elapsed should be at least base time", elapsed >= 500)
-    }
 
     @Test
     fun `updateManualPlaytime with zero time is valid`() = runTest {

@@ -3,12 +3,16 @@ package com.example.gamelogger.ui.features.loggame
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.gamelogger.GameLoggerApplication
 import com.example.gamelogger.data.db.GameLog
 import com.example.gamelogger.data.db.GameLogDao
 import com.example.gamelogger.data.db.GameStatus
 import com.example.gamelogger.data.remote.IgdbService
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -19,9 +23,23 @@ class LogGameViewModel(
 ) : ViewModel() {
 
     val gameLog: StateFlow<GameLog?> = gameLogDao.getGameLog(gameId)
+        .catch { e ->
+            Log.e("LogGameViewModel", "Error loading game log", e)
+            _errorMessage.value = "Error loading game data."
+            emit(null)
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     private val igdbService = IgdbService()
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _isSaving = MutableStateFlow(false)
+    val isSaving: StateFlow<Boolean> = _isSaving.asStateFlow()
 
     suspend fun saveGameLog(
         status: GameStatus,
@@ -33,6 +51,9 @@ class LogGameViewModel(
         locationName: String? = null,
         photoUri: String? = null
     ): Boolean {
+        _isSaving.value = true
+        _errorMessage.value = null
+
         return try {
             // Validate rating bounds
             val validatedRating = userRating?.coerceIn(0.5f, 5.0f)
@@ -43,11 +64,29 @@ class LogGameViewModel(
             // Sanitize review text
             val sanitizedReview = review?.trim()?.take(5000) // Limit review length
 
+            // Sanitize location name
+            val sanitizedLocationName = locationName?.trim()?.take(200)
+
+            // Validate coordinates
+            val validatedLatitude = latitude?.takeIf { it in -90.0..90.0 }
+            val validatedLongitude = longitude?.takeIf { it in -180.0..180.0 }
+
             // Fetch game details - safely handle gameId conversion
             val details = try {
                 val gameIdInt = gameId.toIntOrNull()
                 if (gameIdInt != null) {
-                    igdbService.getGameDetails(gameIdInt)
+                    // Check network before making request
+                    val isConnected = try {
+                        GameLoggerApplication.instance.networkConnectivityManager.isCurrentlyConnected()
+                    } catch (e: Exception) {
+                        true
+                    }
+
+                    if (isConnected) {
+                        igdbService.getGameDetails(gameIdInt)
+                    } else {
+                        null // Skip API call if offline, use cached data
+                    }
                 } else {
                     Log.w("LogGameViewModel", "Invalid gameId format: $gameId")
                     null
@@ -68,9 +107,9 @@ class LogGameViewModel(
                 userRating = validatedRating,
                 review = sanitizedReview,
                 lastStatusDate = System.currentTimeMillis(),
-                latitude = latitude,
-                longitude = longitude,
-                locationName = locationName?.trim()?.take(200),
+                latitude = validatedLatitude,
+                longitude = validatedLongitude,
+                locationName = sanitizedLocationName,
                 title = title,
                 posterUrl = posterUrl,
                 photoUri = photoUri
@@ -79,22 +118,37 @@ class LogGameViewModel(
             true
         } catch (e: Exception) {
             Log.e("LogGameViewModel", "Failed to save game log", e)
+            _errorMessage.value = "Failed to save. Please try again."
             false
+        } finally {
+            _isSaving.value = false
         }
     }
 
     fun updateReview(review: String): kotlinx.coroutines.Job {
         return viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+
             try {
                 val currentLog = gameLogDao.getGameLog(gameId).first()
                 if (currentLog != null) {
                     val sanitizedReview = review.trim().take(5000)
                     val updatedLog = currentLog.copy(review = sanitizedReview)
                     gameLogDao.insertOrUpdateGameLog(updatedLog)
+                } else {
+                    _errorMessage.value = "No game log found to update."
                 }
             } catch (e: Exception) {
                 Log.e("LogGameViewModel", "Failed to update review", e)
+                _errorMessage.value = "Failed to update review. Please try again."
+            } finally {
+                _isLoading.value = false
             }
         }
+    }
+
+    fun clearError() {
+        _errorMessage.value = null
     }
 }

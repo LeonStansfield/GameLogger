@@ -7,6 +7,7 @@ import com.example.gamelogger.data.model.Game
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.headers
 import io.ktor.client.request.parameter
@@ -18,8 +19,19 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.json.Json
 import java.util.Calendar
+
+/**
+ * Custom exception for network-related errors.
+ */
+class NetworkException(message: String, cause: Throwable? = null) : Exception(message, cause)
+
+/**
+ * Custom exception for API-related errors.
+ */
+class ApiException(message: String, val statusCode: Int? = null) : Exception(message)
 
 open class IgdbService {
     private val json = Json {
@@ -32,13 +44,20 @@ open class IgdbService {
             // Use the reusable instance here
             json(json)
         }
+        install(HttpTimeout) {
+            requestTimeoutMillis = 30_000 // 30 seconds
+            connectTimeoutMillis = 15_000 // 15 seconds
+            socketTimeoutMillis = 30_000 // 30 seconds
+        }
     }
 
     private var authToken: AuthToken? = null
+    private var tokenExpirationTime: Long = 0L
 
     // Reusable auth token function
     private suspend fun getAuthTokenIfNeeded(): AuthToken? {
-        if (authToken != null) {
+        // Check if token is still valid (with 5 minute buffer)
+        if (authToken != null && System.currentTimeMillis() < tokenExpirationTime - 300_000) {
             return authToken
         }
 
@@ -51,15 +70,23 @@ open class IgdbService {
             }
 
             if (response.status == HttpStatusCode.OK) {
-                response.body<AuthToken>()
+                val token = response.body<AuthToken>()
+                // Set expiration time (tokens typically last ~60 days, but we'll use expiresIn if available)
+                tokenExpirationTime = System.currentTimeMillis() + (token.expiresIn * 1000L)
+                token
             } else {
                 val errorBody = response.bodyAsText()
                 Log.e("IgdbService", "Error from auth server: ${response.status} - $errorBody")
-                null
+                throw ApiException("Authentication failed: ${response.status}", response.status.value)
             }
+        } catch (e: CancellationException) {
+            // Re-throw cancellation to allow proper coroutine cancellation
+            throw e
+        } catch (e: ApiException) {
+            throw e
         } catch (e: Exception) {
             Log.e("IgdbService", "An unexpected error occurred getting auth token.", e)
-            null
+            throw NetworkException("Failed to authenticate with game service", e)
         }
 
         return authToken
