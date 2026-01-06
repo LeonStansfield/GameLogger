@@ -9,29 +9,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val AppDarkColorScheme = darkColorScheme(
-    primary = LGM_Dark_Blue,
-    secondary = LGM_Grey_Blue,
-    tertiary = LGM_Light_Grey,
-    background = LGM_Near_Black,
-    surface = LGM_Near_Black,
-    onPrimary = LGM_Off_White,
-    onSecondary = LGM_Off_White,
-    onTertiary = LGM_Off_White,
-    onBackground = LGM_Off_White,
-    onSurface = LGM_Off_White
+    primary = Purple_Light,
+    secondary = Purple_Dark,
+    tertiary = Purple_Medium,
+    background = LGM_Black,
+    surface = LGM_Black,
+    onPrimary = LGM_White,
+    onSecondary = LGM_White,
+    onTertiary = LGM_Black,
+    onBackground = LGM_White,
+    onSurface = LGM_White
 )
 
 private val AppLightColorScheme = androidx.compose.material3.lightColorScheme(
-    primary = LGM_Dark_Blue,
-    secondary = LGM_Grey_Blue,
-    tertiary = LGM_Light_Grey,
-    background = LGM_Off_White,
-    surface = LGM_Off_White,
-    onPrimary = androidx.compose.ui.graphics.Color.White,
-    onSecondary = androidx.compose.ui.graphics.Color.White,
-    onTertiary = androidx.compose.ui.graphics.Color.White,
-    onBackground = LGM_Near_Black,
-    onSurface = LGM_Near_Black
+    primary = Purple_Medium,
+    secondary = Teal_Light,
+    tertiary = Teal_Dark,
+    background = LGM_White,
+    surface = LGM_White,
+    onPrimary = LGM_White,
+    onSecondary = LGM_White,
+    onTertiary = LGM_Black,
+    onBackground = LGM_Black,
+    onSurface = LGM_Black
 )
 
 @Composable
