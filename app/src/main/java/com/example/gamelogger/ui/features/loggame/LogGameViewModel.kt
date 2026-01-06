@@ -41,6 +41,38 @@ class LogGameViewModel(
     private val _isSaving = MutableStateFlow(false)
     val isSaving: StateFlow<Boolean> = _isSaving.asStateFlow()
 
+    /**
+     * Fetches the game name from the API or returns cached title from existing log.
+     * Similar pattern to GameDetailsViewModel.fetchGameDetails()
+     */
+    suspend fun fetchGameName(): String? {
+        // First try to get from existing log
+        val existingLog = gameLogDao.getGameLog(gameId).first()
+        if (existingLog?.title != null) {
+            return existingLog.title
+        }
+
+        // Otherwise fetch from API
+        val gameIdInt = gameId.toIntOrNull() ?: return null
+
+        val isConnected = try {
+            GameLoggerApplication.instance.networkConnectivityManager.isCurrentlyConnected()
+        } catch (e: Exception) {
+            true
+        }
+
+        if (!isConnected) {
+            return null
+        }
+
+        return try {
+            igdbService.getGameDetails(gameIdInt)?.name
+        } catch (e: Exception) {
+            Log.e("LogGameViewModel", "Failed to fetch game name", e)
+            null
+        }
+    }
+
     suspend fun saveGameLog(
         status: GameStatus,
         playTime: Long,

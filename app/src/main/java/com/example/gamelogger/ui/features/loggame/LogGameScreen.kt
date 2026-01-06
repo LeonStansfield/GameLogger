@@ -86,6 +86,21 @@ fun LogGameScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
+    // Game name fetching
+    var gameName by remember { mutableStateOf<String?>(null) }
+    var isLoadingName by remember { mutableStateOf(true) }
+
+    LaunchedEffect(gameId) {
+        isLoadingName = true
+        try {
+            gameName = viewModel.fetchGameName()
+        } catch (e: Exception) {
+            gameName = null
+        } finally {
+            isLoadingName = false
+        }
+    }
+
     // Listen for result from CameraScreen
     // Watches the "photo_uri" key in navigation backstack
     val currentBackStackEntry = navController.currentBackStackEntry
@@ -145,8 +160,13 @@ fun LogGameScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Log game ID: $gameId",
-                    fontSize = 18.sp
+                    text = when {
+                        gameName != null -> gameName!!
+                        isLoadingName -> "Loading game..."
+                        else -> "Unknown Game"
+                    },
+                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleLarge
                 )
 
                 // Display last status update date if available

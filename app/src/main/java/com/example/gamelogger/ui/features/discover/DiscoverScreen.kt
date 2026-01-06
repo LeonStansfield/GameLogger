@@ -96,7 +96,7 @@ fun DiscoverScreen(
 @Composable
 fun RandomGameButton(onClick: () -> Unit) {
     Button(
-        onClick = onClick, // Wired up correctly
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
