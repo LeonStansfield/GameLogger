@@ -42,7 +42,7 @@ class SearchViewModel(
     private var searchJob: Job? = null
 
     init {
-        // Re-execute search if we had a saved query
+        // Re-execute search if had a saved query
         val savedQuery = savedStateHandle.get<String>(KEY_SEARCH_QUERY)
         if (!savedQuery.isNullOrBlank() && savedQuery.length >= 3) {
             onSearchQueryChanged(savedQuery)

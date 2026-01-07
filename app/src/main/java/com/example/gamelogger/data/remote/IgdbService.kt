@@ -71,7 +71,7 @@ open class IgdbService {
 
             if (response.status == HttpStatusCode.OK) {
                 val token = response.body<AuthToken>()
-                // Set expiration time (tokens typically last ~60 days, but we'll use expiresIn if available)
+                // Set expiration time (tokens typically last ~60 days, but use expiresIn if available)
                 tokenExpirationTime = System.currentTimeMillis() + (token.expiresIn * 1000L)
                 token
             } else {
@@ -191,7 +191,7 @@ open class IgdbService {
                 setBody(apiQuery)
             }
 
-            // The API returns a list, even for a single ID. We take the first result.
+            // The API returns a list, even for a single ID. Take the first result.
             response.body<List<Game>>().firstOrNull()
 
         } catch (e: Exception) {

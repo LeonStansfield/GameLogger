@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun EditTimeDialog(
     initialSeconds: Long,
-    onConfirm: (Int, Int) -> Unit, // Returns Hours, Minutes
+    onConfirm: (Int, Int) -> Unit,
     onDismiss: () -> Unit
 ) {
     // Calculate initial hours/minutes from the total seconds

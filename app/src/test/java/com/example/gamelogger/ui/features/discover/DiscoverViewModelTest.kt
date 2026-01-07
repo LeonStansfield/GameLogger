@@ -83,7 +83,7 @@ class DiscoverViewModelTest {
         // Assert
         assertTrue("Games list should be empty on failure", viewModel.games.isEmpty())
         assertFalse("Loading should be false even after error", viewModel.isLoading)
-        // Verify we attempted to fetch
+        // Verify attempted to fetch
         coVerify(exactly = 1) { igdbService.getTop20TrendingGames() }
     }
 

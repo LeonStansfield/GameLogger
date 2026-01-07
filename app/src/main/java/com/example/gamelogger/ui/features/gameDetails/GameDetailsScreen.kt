@@ -298,7 +298,6 @@ private fun GameDetailsContent(
                     // Play / Stop Button
                     IconButton(
                         onClick = {
-                            // Pass the Game object so the VM can create a log if one doesn't exist
                             timerViewModel.toggleTimer(game)
                         },
                         modifier = Modifier
@@ -332,7 +331,7 @@ private fun GameDetailsContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(80.dp)) // Padding for FAB
+            Spacer(modifier = Modifier.height(80.dp))
         }
     }
     if (showEditTimeDialog) {

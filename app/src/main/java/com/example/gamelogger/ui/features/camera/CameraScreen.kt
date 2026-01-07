@@ -46,7 +46,7 @@ fun CameraScreen(
     val context = LocalContext.current
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
 
-    // 1. Permission State
+    // Permission State
     val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
 
     LaunchedEffect(Unit) {
@@ -56,13 +56,13 @@ fun CameraScreen(
     }
 
     if (cameraPermissionState.status.isGranted) {
-        // 2. Camera Setup
+        // Camera Setup
         val preview = remember { Preview.Builder().build() }
         val imageCapture = remember { ImageCapture.Builder().build() }
         val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
         val previewView = remember { PreviewView(context) }
 
-        // 3. Bind to Lifecycle
+        // Bind to Lifecycle
         LaunchedEffect(Unit) {
             val cameraProvider = context.getCameraProvider()
             cameraProvider.unbindAll()

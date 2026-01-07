@@ -51,7 +51,7 @@ class ThemeRepositoryTest {
         every { preferences[themeKey] } returns null
         coEvery { dataStore.data } returns flowOf(preferences)
 
-        // Note: We can't easily mock the extension property, so this test
+        // Note: Can't easily mock the extension property, so this test
         // verifies the AppTheme enum behavior instead
 
         // Act

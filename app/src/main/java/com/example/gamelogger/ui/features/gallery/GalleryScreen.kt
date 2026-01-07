@@ -104,7 +104,7 @@ fun GalleryScreen() {
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Fit
             )
-            // Optional: Show Game Title at bottom
+            // Show Game Title at bottom
             Text(
                 text = selectedLog!!.title ?: "",
                 color = Color.White,
@@ -138,7 +138,6 @@ fun GalleryItem(
         )
 
         // Small Game Icon in Corner
-        // We use a small circular version of the poster
         if (gameLog.posterUrl != null) {
             AsyncImage(
                 model = gameLog.posterUrl,

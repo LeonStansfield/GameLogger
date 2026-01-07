@@ -271,7 +271,7 @@ fun GameLogDetailsDialog(
                         null
                     }
 
-                    // Display the row if we have a valid time string
+                    // Display the row if has a valid time string
                     displayTime?.let {
                         DetailRow(label = "Play Time", value = it)
                     }

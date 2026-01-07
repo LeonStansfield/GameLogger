@@ -136,7 +136,7 @@ class TimerViewModelIntegrationTest {
         viewModel.toggleTimer(gameDetails).join()
 
         // The timer heartbeat runs in viewModelScope with real delay(1000)
-        // We need to wait for real time to pass for the heartbeat to tick
+        // Need to wait for real time to pass for the heartbeat to tick
         // Using Thread.sleep for real-time delay since test coroutines use virtual time
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
             kotlinx.coroutines.delay(2500) // Wait for heartbeat

@@ -60,7 +60,7 @@ class DiscoverViewModel(
                     when (status) {
                         NetworkStatus.Available -> {
                             isOffline = false
-                            // Auto-retry if we had an error and network is back
+                            // Auto-retry if had an error and network is back
                             if (errorMessage != null && games.isEmpty()) {
                                 fetchTop20TrendingGames()
                             }
